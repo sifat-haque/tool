@@ -438,7 +438,6 @@
                 generateBtn.disabled = true;
                 
                 try {
-                    // Using the provided Gemini API key
                     const API_KEY = 'AIzaSyC1TLMOvMPXqfqSVHqjmFXVJSF72V9MMH8';
                     const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${API_KEY}`;
                     
@@ -492,7 +491,7 @@
                     const data = await response.json();
                     const responseText = data.candidates[0].content.parts[0].text;
                     
-                    // Improved parsing for Bengali output
+                    // Parse questions and answers
                     const questions = [];
                     const qaBlocks = responseText.split(/\d+\.\s*প্রশ্ন:/).slice(1);
                     
