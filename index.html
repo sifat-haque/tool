@@ -427,106 +427,105 @@
             });
             
             // Generate questions with Gemini API
-            generateBtn.addEventListener('click', async function() {
-                if (!extractedBengaliText.trim()) {
-                    showError('প্রথমে টেক্সট এক্সট্রাক্ট করুন।');
-                    return;
+           // Generate questions using OpenAI API
+generateBtn.addEventListener('click', async function () {
+    if (!extractedBengaliText.trim()) {
+        showError('প্রথমে টেক্সট এক্সট্রাক্ট করুন।');
+        return;
+    }
+
+    showStatus('OpenAI দ্বারা প্রশ্ন তৈরি করা হচ্ছে...', 'status');
+    loader.style.display = 'block';
+    generateBtn.disabled = true;
+
+    try {
+        const API_KEY = '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'; // <-- এখানে আপনার key দিন
+        const API_URL = 'https://api.openai.com/v1/chat/completions';
+
+        const messages = [
+            {
+                role: "system",
+                content: `তুমি একজন পেশাদার বাংলা শিক্ষক। নিচে একটি বাংলা লেখা দেওয়া হলো। তুমি এর উপর ভিত্তি করে ১৫টি প্রশ্ন এবং তাদের উত্তর তৈরি করবে। প্রশ্ন-উত্তর বাংলায় থাকবে এবং নিচের JSON ফরম্যাটে থাকবে:
+
+[
+  { "q": "প্রশ্ন ১", "a": "উত্তর ১" },
+  { "q": "প্রশ্ন ২", "a": "উত্তর ২" },
+  ...
+]
+
+শুধু JSON ফরম্যাটে আউটপুট দাও, ব্যাখ্যা বা অন্য কিছু লিখবে না।`
+            },
+            {
+                role: "user",
+                content: `${extractedBengaliText.substring(0, 3000)}`
+            }
+        ];
+
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${API_KEY}`
+            },
+            body: JSON.stringify({
+                model: 'gpt-3.5-turbo', // আপনি চাইলে gpt-4 করতে পারেন
+                messages: messages,
+                temperature: 0.7
+            })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error?.message || 'API call failed');
+        }
+
+        const data = await response.json();
+        const rawText = data.choices[0].message.content;
+
+        let questions = [];
+
+        try {
+            const start = rawText.indexOf('[');
+            const end = rawText.lastIndexOf(']');
+            const jsonText = rawText.slice(start, end + 1);
+            questions = JSON.parse(jsonText);
+        } catch (e) {
+            console.warn('Parsing failed. Using regex fallback.');
+
+            const qaPairs = rawText.split(/(?=\d+\.\s*প্রশ্ন:)/);
+            qaPairs.forEach(pair => {
+                const match = pair.match(/প্রশ্ন:\s*(.*?)\s*উত্তর:\s*(.*)/s);
+                if (match && match[1] && match[2]) {
+                    questions.push({
+                        question: match[1].trim(),
+                        answer: match[2].trim().replace(/\n+/g, ' ')
+                    });
                 }
-                
-                showStatus('জেমিনি এআই দ্বারা প্রশ্ন তৈরি করা হচ্ছে...', 'status');
-                loader.style.display = 'block';
-                generateBtn.disabled = true;
-                
-                try {
-                     const API_KEY = 'AIzaSyC1TLMOvMPXqfqSVHqjmFXVJSF72V9MMH8'; // Your API key
-                    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
-                    
-                    const prompt = `
-                    আপনি একজন অভিজ্ঞ শিক্ষক। নিচের বাংলা পাঠ্য থেকে ১৫টি সুস্পষ্ট, সংক্ষিপ্ত এবং শিক্ষণীয় প্রশ্ন তৈরি করুন।
-                    প্রতিটি প্রশ্নের উত্তর দিন ২-৩ বাক্যে। প্রশ্নগুলো পাঠ্যের বিভিন্ন বিষয়বস্তু কভার করুন।
+            });
+        }
 
-                    পাঠ্য:
-                    ${extractedBengaliText.substring(0, 3000)}
+        // Fill up to 15
+        while (questions.length < 15) {
+            questions.push({
+                question: `অতিরিক্ত প্রশ্ন ${questions.length + 1}`,
+                answer: "এই প্রশ্নের উত্তর পাঠ্যে দেওয়া আছে।"
+            });
+        }
 
-                    নির্দেশনা:
-                    ১. প্রশ্নগুলো পাঠ্যের গুরুত্বপূর্ণ তথ্য কভার করবে
-                    ২. উত্তরগুলো সংক্ষিপ্ত কিন্তু পূর্ণাঙ্গ হবে
-                    ৩. সম্পূর্ণ বাংলায় লিখুন
-                    ৪. নম্বর দিয়ে প্রশ্ন সাজান
+        displayQuestions(questions.slice(0, 15));
+        showStatus('১৫টি প্রশ্নোত্তর সফলভাবে তৈরি হয়েছে ✅', 'status');
+        copyQABtn.disabled = false;
 
-                    ফরম্যাট:
-                    ১. প্রশ্ন: [স্পষ্ট প্রশ্ন লিখুন]
-                    উত্তর: [২-৩ বাক্যের উত্তর]
+    } catch (error) {
+        console.error('API Error:', error);
+        showError(`ত্রুটি: ${error.message || 'প্রশ্ন তৈরি করতে সমস্যা হয়েছে'}`);
+        displaySampleQuestions();
+    } finally {
+        loader.style.display = 'none';
+        generateBtn.disabled = false;
+    }
+});
 
-                    ২. প্রশ্ন: [স্পষ্ট প্রশ্ন লিখুন]
-                    উত্তর: [২-৩ বাক্যের উত্তর]
-                    ...
-                    `;
-
-                    const response = await fetch(API_URL, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            contents: [{
-                                parts: [{
-                                    text: prompt
-                                }]
-                            }],
-                            generationConfig: {
-                                temperature: 0.5,
-                                topK: 40,
-                                topP: 0.9,
-                                maxOutputTokens: 2048
-                            }
-                        })
-                    });
-
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(errorData.error?.message || 'API request failed');
-                    }
-
-                    const data = await response.json();
-                    const responseText = data.candidates[0].content.parts[0].text;
-                    
-                    // Parse questions and answers
-                    const questions = [];
-                    const qaBlocks = responseText.split(/\d+\.\s*প্রশ্ন:/).slice(1);
-                    
-                    qaBlocks.forEach(block => {
-                        const [questionPart, answerPart] = block.split(/\s*উত্তর:\s*/);
-                        if (questionPart && answerPart) {
-                            questions.push({
-                                question: questionPart.trim(),
-                                answer: answerPart.trim().replace(/\n+/g, ' ')
-                            });
-                        }
-                    });
-                    
-                    // Ensure we have exactly 15 questions
-                    if (questions.length < 15) {
-                        const remaining = 15 - questions.length;
-                        for (let i = 0; i < remaining; i++) {
-                            questions.push({
-                                question: `পাঠ্যের অতিরিক্ত প্রশ্ন ${questions.length + 1}`,
-                                answer: "এই প্রশ্নের উত্তর পাঠ্যে দেওয়া আছে"
-                            });
-                        }
-                    }
-                    
-                    displayQuestions(questions.slice(0, 15));
-                    showStatus('১৫টি প্রশ্নোত্তর সফলভাবে তৈরি করা হয়েছে!', 'status');
-                    copyQABtn.disabled = false;
-                    
-                } catch (error) {
-                    console.error('API Error:', error);
-                    showError(`ত্রুটি: ${error.message || 'প্রশ্ন তৈরি করতে সমস্যা হয়েছে'}`);
-                    displaySampleQuestions();
-                } finally {
-                    loader.style.display = 'none';
-                    generateBtn.disabled = false;
                 }
             });
             
