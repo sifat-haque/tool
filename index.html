@@ -427,22 +427,25 @@
             });
             
            // Generate questions with Gemini API
+// Generate questions using OpenAI API
 generateBtn.addEventListener('click', async function () {
     if (!extractedBengaliText.trim()) {
         showError('প্রথমে টেক্সট এক্সট্রাক্ট করুন।');
         return;
     }
 
-    showStatus('জেমিনি এআই দ্বারা প্রশ্ন তৈরি করা হচ্ছে...', 'status');
+    showStatus('OpenAI দ্বারা প্রশ্ন তৈরি করা হচ্ছে...', 'status');
     loader.style.display = 'block';
     generateBtn.disabled = true;
 
     try {
-        const API_KEY = 'AIzaSyC1TLMOvMPXqfqSVHqjmFXVJSF72V9MMH8';
-        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${API_KEY}`;
+        const API_KEY = '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'; // <-- এখানে আপনার key দিন
+        const API_URL = 'https://api.openai.com/v1/chat/completions';
 
-        const promptText = `
-তুমি একজন পেশাদার শিক্ষক। নিচে দেওয়া বাংলা লেখার উপর ভিত্তি করে ১৫টি প্রশ্ন এবং তাদের সংক্ষিপ্ত উত্তর তৈরি করো। প্রশ্নগুলো সহজ ও পাঠ্যভিত্তিক হবে। আউটপুট নিচের ফরম্যাটে দাও:
+        const messages = [
+            {
+                role: "system",
+                content: `তুমি একজন পেশাদার বাংলা শিক্ষক। নিচে একটি বাংলা লেখা দেওয়া হলো। তুমি এর উপর ভিত্তি করে ১৫টি প্রশ্ন এবং তাদের উত্তর তৈরি করবে। প্রশ্ন-উত্তর বাংলায় থাকবে এবং নিচের JSON ফরম্যাটে থাকবে:
 
 [
   { "q": "প্রশ্ন ১", "a": "উত্তর ১" },
@@ -450,38 +453,35 @@ generateBtn.addEventListener('click', async function () {
   ...
 ]
 
-লেখা:
-""" 
-${extractedBengaliText.substring(0, 3000)} 
-"""
-`;
-
-        const prompt = {
-            contents: [{
-                parts: [{ text: promptText }]
-            }],
-            generationConfig: {
-                temperature: 0.7,
-                topP: 0.9,
-                topK: 40
+শুধু JSON ফরম্যাটে আউটপুট দাও, ব্যাখ্যা বা অন্য কিছু লিখবে না।`
+            },
+            {
+                role: "user",
+                content: `${extractedBengaliText.substring(0, 3000)}`
             }
-        };
+        ];
 
         const response = await fetch(API_URL, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(prompt)
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${API_KEY}`
+            },
+            body: JSON.stringify({
+                model: 'gpt-3.5-turbo', // আপনি চাইলে gpt-4 করতে পারেন
+                messages: messages,
+                temperature: 0.7
+            })
         });
 
         if (!response.ok) {
             const errorData = await response.json();
-            throw new Error(errorData.error?.message || 'API request failed');
+            throw new Error(errorData.error?.message || 'API call failed');
         }
 
         const data = await response.json();
-        const rawText = data.candidates[0].content.parts[0].text;
+        const rawText = data.choices[0].message.content;
 
-        // Try parsing the output as JSON
         let questions = [];
 
         try {
@@ -504,7 +504,7 @@ ${extractedBengaliText.substring(0, 3000)}
             });
         }
 
-        // Ensure 15 items
+        // Fill up to 15
         while (questions.length < 15) {
             questions.push({
                 question: `অতিরিক্ত প্রশ্ন ${questions.length + 1}`,
@@ -523,6 +523,9 @@ ${extractedBengaliText.substring(0, 3000)}
     } finally {
         loader.style.display = 'none';
         generateBtn.disabled = false;
+    }
+});
+
     }
 });
 
