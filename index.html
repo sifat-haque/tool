@@ -427,7 +427,7 @@
             });
             
             // Generate questions with Gemini API
-            generateBtn.addEventListener('click', async function() {
+              generateBtn.addEventListener('click', async function() {
                 if (!extractedBengaliText.trim()) {
                     showError('প্রথমে টেক্সট এক্সট্রাক্ট করুন।');
                     return;
@@ -438,49 +438,45 @@
                 generateBtn.disabled = true;
                 
                 try {
-                     const API_KEY = 'AIzaSyC1TLMOvMPXqfqSVHqjmFXVJSF72V9MMH8'; // Your API key
+                    const API_KEY = 'AIzaSyC1TLMOvMPXqfqSVHqjmFXVJSF72V9MMH8';
                     const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
                     
-                    const prompt = `
-                    আপনি একজন অভিজ্ঞ শিক্ষক। নিচের বাংলা পাঠ্য থেকে ১৫টি সুস্পষ্ট, সংক্ষিপ্ত এবং শিক্ষণীয় প্রশ্ন তৈরি করুন।
-                    প্রতিটি প্রশ্নের উত্তর দিন ২-৩ বাক্যে। প্রশ্নগুলো পাঠ্যের বিভিন্ন বিষয়বস্তু কভার করুন।
-
-                    পাঠ্য:
-                    ${extractedBengaliText.substring(0, 3000)}
-
-                    নির্দেশনা:
-                    ১. প্রশ্নগুলো পাঠ্যের গুরুত্বপূর্ণ তথ্য কভার করবে
-                    ২. উত্তরগুলো সংক্ষিপ্ত কিন্তু পূর্ণাঙ্গ হবে
-                    ৩. সম্পূর্ণ বাংলায় লিখুন
-                    ৪. নম্বর দিয়ে প্রশ্ন সাজান
-
-                    ফরম্যাট:
-                    ১. প্রশ্ন: [স্পষ্ট প্রশ্ন লিখুন]
-                    উত্তর: [২-৩ বাক্যের উত্তর]
-
-                    ২. প্রশ্ন: [স্পষ্ট প্রশ্ন লিখুন]
-                    উত্তর: [২-৩ বাক্যের উত্তর]
-                    ...
-                    `;
+                    // Optimized prompt for better question generation
+                    const prompt = {
+                        contents: [{
+                            parts: [{
+                                text: `আমি একজন শিক্ষক। নিচের বাংলা পাঠ্য থেকে ১৫টি সুস্পষ্ট প্রশ্ন তৈরি করতে চাই:
+                                
+                                পাঠ্য: ${extractedBengaliText.substring(0, 3000)}
+                                
+                                নির্দেশনা:
+                                1. প্রতিটি প্রশ্নের উত্তর ২-৩ বাক্যে দিন
+                                2. প্রশ্নগুলো পাঠ্যের বিভিন্ন অংশ থেকে তৈরি করুন
+                                3. প্রশ্ন ও উত্তর সম্পূর্ণ বাংলায় লিখুন
+                                4. নম্বর দিয়ে প্রশ্ন সাজান
+                                
+                                ফরম্যাট:
+                                ১. প্রশ্ন: [প্রশ্ন লিখুন]
+                                উত্তর: [উত্তর লিখুন]
+                                
+                                ২. প্রশ্ন: [প্রশ্ন লিখুন]
+                                উত্তর: [উত্তর লিখুন]
+                                `
+                            }]
+                        }],
+                        generationConfig: {
+                            temperature: 0.7,
+                            topP: 0.95,
+                            topK: 40
+                        }
+                    };
 
                     const response = await fetch(API_URL, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify({
-                            contents: [{
-                                parts: [{
-                                    text: prompt
-                                }]
-                            }],
-                            generationConfig: {
-                                temperature: 0.5,
-                                topK: 40,
-                                topP: 0.9,
-                                maxOutputTokens: 2048
-                            }
-                        })
+                        body: JSON.stringify(prompt)
                     });
 
                     if (!response.ok) {
@@ -489,31 +485,30 @@
                     }
 
                     const data = await response.json();
+                    
+                    // Improved parsing logic
                     const responseText = data.candidates[0].content.parts[0].text;
-                    
-                    // Parse questions and answers
                     const questions = [];
-                    const qaBlocks = responseText.split(/\d+\.\s*প্রশ্ন:/).slice(1);
                     
-                    qaBlocks.forEach(block => {
-                        const [questionPart, answerPart] = block.split(/\s*উত্তর:\s*/);
-                        if (questionPart && answerPart) {
+                    // Split by Bengali numbering patterns
+                    const qaPairs = responseText.split(/(?=\d+\.\s*প্রশ্ন:)/);
+                    
+                    qaPairs.forEach(pair => {
+                        const match = pair.match(/(\d+)\.\s*প্রশ্ন:\s*(.*?)\s*উত্তর:\s*(.*)/s);
+                        if (match && match[2] && match[3]) {
                             questions.push({
-                                question: questionPart.trim(),
-                                answer: answerPart.trim().replace(/\n+/g, ' ')
+                                question: match[2].trim(),
+                                answer: match[3].trim().replace(/\n+/g, ' ')
                             });
                         }
                     });
                     
                     // Ensure we have exactly 15 questions
-                    if (questions.length < 15) {
-                        const remaining = 15 - questions.length;
-                        for (let i = 0; i < remaining; i++) {
-                            questions.push({
-                                question: `পাঠ্যের অতিরিক্ত প্রশ্ন ${questions.length + 1}`,
-                                answer: "এই প্রশ্নের উত্তর পাঠ্যে দেওয়া আছে"
-                            });
-                        }
+                    while (questions.length < 15) {
+                        questions.push({
+                            question: `অতিরিক্ত প্রশ্ন ${questions.length + 1}`,
+                            answer: "এই প্রশ্নের উত্তর পাঠ্যে দেওয়া আছে"
+                        });
                     }
                     
                     displayQuestions(questions.slice(0, 15));
