@@ -1,648 +1,748 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>বাংলা বই থেকে প্রশ্নোত্তর তৈরি করুন</title>
-    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
+    <title>SimplifyIQ - Study Smarter</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root {
-            --primary: #1a73e8;
-            --secondary: #34a853;
-            --dark: #0d47a1;
-            --light: #e8f0fe;
-            --text: #202124;
-            --background: #f8f9fa;
-            --error: #d32f2f;
-        }
-        
         * {
-            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Roboto', 'Noto Sans Bengali', Arial, sans-serif;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --accent: #f72585;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --success: #4cc9f0;
+            --warning: #ffbe0b;
+            --danger: #ef233c;
+            --gray: #6c757d;
+            --light-gray: #e9ecef;
         }
         
         body {
-            background-color: var(--background);
-            color: var(--text);
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: var(--dark);
             line-height: 1.6;
-            padding: 20px;
             min-height: 100vh;
+            padding-bottom: 2rem;
         }
         
         .container {
-            max-width: 1000px;
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 0 1.5rem;
         }
         
-        h1 {
-            text-align: center;
-            margin-bottom: 30px;
-            color: var(--dark);
+        header {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            padding: 1.5rem 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .logo i {
             font-size: 2rem;
         }
         
-        .card {
-            background-color: white;
-            border-radius: 8px;
-            padding: 25px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            margin-bottom: 25px;
+        .logo h1 {
+            font-weight: 700;
+            font-size: 1.8rem;
         }
         
-        .section-title {
-            margin-bottom: 20px;
-            color: var(--dark);
-            font-size: 1.3rem;
-            border-bottom: 2px solid var(--light);
-            padding-bottom: 8px;
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
         }
         
-        .upload-area {
-            border: 2px dashed var(--primary);
-            border-radius: 8px;
-            padding: 30px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-bottom: 20px;
-            background-color: var(--light);
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
         }
         
-        .upload-area:hover {
-            background-color: #d2e3fc;
+        nav a:hover {
+            color: var(--warning);
         }
         
-        .upload-icon {
-            font-size: 48px;
-            color: var(--primary);
-            margin-bottom: 15px;
-        }
-        
-        #imagePreview {
-            max-width: 100%;
-            max-height: 300px;
-            margin-top: 15px;
-            display: none;
-            border-radius: 4px;
-            border: 1px solid #ddd;
-        }
-        
-        #fileInput {
-            display: none;
-        }
-        
-        .btn {
-            background-color: var(--primary);
+        .cta-button {
+            background-color: var(--accent);
             color: white;
             border: none;
-            padding: 12px 24px;
-            border-radius: 6px;
+            padding: 0.6rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 600;
             cursor: pointer;
-            font-size: 16px;
-            transition: all 0.3s;
-            font-weight: 500;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
+            transition: all 0.3s ease;
         }
         
-        .btn:hover {
-            background-color: var(--dark);
+        .cta-button:hover {
+            background-color: #d81159;
             transform: translateY(-2px);
         }
         
-        .btn:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-            transform: none;
+        .hero {
+            text-align: center;
+            padding: 4rem 0;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .hero h2 {
+            font-size: 2.8rem;
+            margin-bottom: 1.5rem;
+            color: var(--secondary);
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--gray);
+            margin-bottom: 2rem;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--light-gray);
+        }
+        
+        .card-title {
+            font-size: 1.5rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .process-steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+        
+        .step {
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .step-icon {
+            background: var(--primary);
+            color: white;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin: 0 auto 1.5rem;
+        }
+        
+        .step h3 {
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+            color: var(--secondary);
+        }
+        
+        .upload-area {
+            border: 3px dashed var(--primary);
+            border-radius: 12px;
+            padding: 3rem;
+            text-align: center;
+            margin: 2rem 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .upload-area:hover {
+            background-color: rgba(67, 97, 238, 0.05);
+        }
+        
+        .upload-icon {
+            font-size: 3.5rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+        
+        .btn {
+            padding: 0.8rem 1.8rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--secondary);
         }
         
         .btn-secondary {
-            background-color: var(--secondary);
+            background: var(--light-gray);
+            color: var(--dark);
         }
         
         .btn-secondary:hover {
-            background-color: #2d9246;
+            background: #dcdedf;
         }
         
-        .text-area {
-            width: 100%;
-            min-height: 150px;
-            border: 1px solid #ddd;
-            padding: 15px;
-            border-radius: 6px;
-            font-family: 'Noto Sans Bengali', Arial, sans-serif;
-            font-size: 16px;
-            resize: vertical;
-            margin-bottom: 15px;
+        .options {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin: 1.5rem 0;
         }
         
-        .progress-container {
-            width: 100%;
-            background-color: #f1f1f1;
-            border-radius: 6px;
-            margin: 15px 0;
-            display: none;
+        .option-chip {
+            background: var(--light-gray);
+            padding: 0.6rem 1.2rem;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
         
-        #progressBar {
-            width: 0%;
-            height: 24px;
-            background-color: var(--primary);
-            border-radius: 6px;
-            text-align: center;
-            line-height: 24px;
+        .option-chip.active {
+            background: var(--primary);
             color: white;
-            font-weight: 500;
-            transition: width 0.3s;
         }
         
-        .status {
-            text-align: center;
-            margin: 15px 0;
-            font-style: italic;
-            color: #666;
-            min-height: 24px;
+        .result-area {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin: 2rem 0;
         }
         
-        .error {
-            color: var(--error);
-            font-weight: 500;
+        .result-box {
+            background: var(--light);
+            border-radius: 8px;
+            padding: 1.5rem;
+            min-height: 300px;
+            max-height: 500px;
+            overflow-y: auto;
         }
         
-        .loader {
-            display: none;
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid var(--primary);
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
+        .result-title {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: var(--secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
         
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .question-list {
+            margin-top: 1.5rem;
         }
         
         .question-item {
-            margin-bottom: 20px;
-            padding: 20px;
-            background-color: white;
+            background: white;
             border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            border-left: 4px solid var(--primary);
+            padding: 1.2rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
         }
         
-        .question {
+        .question-text {
             font-weight: 600;
-            margin-bottom: 10px;
+            margin-bottom: 0.8rem;
+        }
+        
+        .options-list {
+            display: grid;
+            gap: 0.5rem;
+            margin: 0.8rem 0;
+        }
+        
+        .option-item {
+            padding: 0.6rem;
+            background: var(--light-gray);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .option-item:hover {
+            background: #dcdedf;
+        }
+        
+        .option-item.correct {
+            background: #d1e7dd;
+            color: #0f5132;
+        }
+        
+        .option-item.incorrect {
+            background: #f8d7da;
+            color: #842029;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 0.35rem 0.65rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-right: 0.5rem;
+        }
+        
+        .badge-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .badge-success {
+            background: var(--success);
+            color: white;
+        }
+        
+        .badge-warning {
+            background: var(--warning);
             color: var(--dark);
-            font-size: 1.1rem;
         }
         
-        .answer {
-            color: var(--text);
-            padding-left: 15px;
-            border-left: 2px solid var(--light);
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
         }
         
-        .actions {
+        .feature {
             display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            margin-top: 20px;
+            gap: 1rem;
+        }
+        
+        .feature-icon {
+            color: var(--primary);
+            font-size: 2rem;
+        }
+        
+        .pricing {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+        
+        .pricing-plan {
+            background: white;
+            border-radius: 12px;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .pricing-plan.popular::before {
+            content: 'MOST POPULAR';
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: var(--accent);
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 0.4rem 1.5rem;
+            transform: rotate(45deg) translateX(1.3rem) translateY(-1.5rem);
+            width: 150px;
+        }
+        
+        .plan-name {
+            font-size: 1.5rem;
+            color: var(--secondary);
+            margin-bottom: 1rem;
+        }
+        
+        .plan-price {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 2rem;
+        }
+        
+        .plan-features {
+            list-style: none;
+            margin-bottom: 2rem;
+        }
+        
+        .plan-features li {
+            padding: 0.6rem 0;
+            border-bottom: 1px solid var(--light-gray);
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 4rem;
+            padding: 2rem 0;
+            color: var(--gray);
         }
         
         @media (max-width: 768px) {
-            .container {
-                padding: 15px;
+            .result-area {
+                grid-template-columns: 1fr;
             }
             
-            h1 {
-                font-size: 1.5rem;
-            }
-            
-            .card {
-                padding: 20px;
-            }
-            
-            .upload-area {
-                padding: 20px 15px;
-            }
-            
-            .btn {
-                width: 100%;
-                padding: 14px;
-            }
-            
-            .actions {
+            .header-content {
                 flex-direction: column;
-                gap: 10px;
+                gap: 1rem;
+            }
+            
+            nav ul {
+                gap: 1rem;
+            }
+            
+            .hero h2 {
+                font-size: 2.2rem;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>বাংলা বই থেকে প্রশ্নোত্তর তৈরি করুন</h1>
-        
-        <div class="card">
-            <h2 class="section-title">বইয়ের পৃষ্ঠা আপলোড করুন</h2>
-            <div class="upload-area" id="uploadArea">
-                <div class="upload-icon">📄</div>
-                <p>ছবি আপলোড করতে ক্লিক করুন বা ফাইলটি এখানে ড্রপ করুন</p>
-                <p><small>সমর্থিত ফরম্যাট: JPEG, PNG (সর্বোচ্চ 5MB)</small></p>
-                <img id="imagePreview" alt="আপলোড করা ছবির প্রিভিউ">
-            </div>
-            <input type="file" id="fileInput" accept="image/jpeg, image/png">
-            
-            <div class="progress-container" id="progressContainer">
-                <div id="progressBar">0%</div>
-            </div>
-            
-            <p class="status" id="statusText"></p>
-            <div class="loader" id="loader"></div>
-            
-            <div class="actions">
-                <button id="extractBtn" class="btn" disabled>
-                    <span>টেক্সট বের করুন</span>
-                </button>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-brain"></i>
+                    <h1>SimplifyIQ</h1>
+                </div>
+                <nav>
+                    <ul>
+                        <li><a href="#">Home</a></li>
+                        <li><a href="#">How It Works</a></li>
+                        <li><a href="#">Pricing</a></li>
+                        <li><a href="#">Contact</a></li>
+                    </ul>
+                </nav>
+                <button class="cta-button">Get Started</button>
             </div>
         </div>
-        
-        <div class="card">
-            <h2 class="section-title">এক্সট্রাক্ট করা টেক্সট</h2>
-            <textarea id="extractedText" class="text-area" placeholder="এখানে এক্সট্রাক্ট করা টেক্সট দেখানো হবে..." readonly></textarea>
-            
-            <div class="actions">
-                <button id="generateBtn" class="btn btn-secondary" disabled>
-                    <span>প্রশ্ন তৈরি করুন (১৫টি)</span>
-                </button>
-                <button id="copyTextBtn" class="btn" disabled>
-                    <span>টেক্সট কপি করুন</span>
+    </header>
+
+    <main class="container">
+        <section class="hero">
+            <h2>From Complex to Mastery.<br>Study Smarter.</h2>
+            <p>SimplifyIQ uses AI to transform complex textbook material into easy-to-understand language and generates practice questions to help you ace your exams.</p>
+            <button class="cta-button">Try It Free</button>
+        </section>
+
+        <section class="process-steps">
+            <div class="step">
+                <div class="step-icon">
+                    <i class="fas fa-upload"></i>
+                </div>
+                <h3>Upload Content</h3>
+                <p>Upload your textbook pages, notes, or PDFs. We support both English and Bengali.</p>
+            </div>
+            <div class="step">
+                <div class="step-icon">
+                    <i class="fas fa-language"></i>
+                </div>
+                <h3>Simplify Text</h3>
+                <p>AI simplifies complex text into easy-to-understand language with key points.</p>
+            </div>
+            <div class="step">
+                <div class="step-icon">
+                    <i class="fas fa-question-circle"></i>
+                </div>
+                <h3>Generate Questions</h3>
+                <p>Get MCQs, True/False, Short Answer, and Fill-in-the-blank questions.</p>
+            </div>
+        </section>
+
+        <section class="card">
+            <div class="card-header">
+                <h2 class="card-title"><i class="fas fa-magic"></i> AI Study Assistant</h2>
+                <div class="options">
+                    <div class="option-chip active">
+                        <i class="fas fa-file-pdf"></i> PDF
+                    </div>
+                    <div class="option-chip">
+                        <i class="fas fa-image"></i> Image
+                    </div>
+                    <div class="option-chip">
+                        <i class="fas fa-font"></i> Text
+                    </div>
+                </div>
+            </div>
+
+            <div class="upload-area">
+                <div class="upload-icon">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                </div>
+                <h3>Upload your study material</h3>
+                <p>Drag & drop your file here or click to browse</p>
+                <p class="small">Supported formats: PDF, JPG, PNG, TXT (Max 25MB)</p>
+            </div>
+
+            <div class="options">
+                <div class="option-chip active">
+                    <i class="fas fa-bolt"></i> Simple
+                </div>
+                <div class="option-chip">
+                    <i class="fas fa-balance-scale"></i> Medium
+                </div>
+                <div class="option-chip">
+                    <i class="fas fa-graduation-cap"></i> Exam-Level
+                </div>
+            </div>
+
+            <div style="text-align: center; margin: 2rem 0;">
+                <button class="btn btn-primary" id="simplify-btn">
+                    <i class="fas fa-spinner fa-spin" id="spinner" style="display: none;"></i>
+                    Simplify Content
                 </button>
             </div>
-        </div>
-        
-        <div class="card">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <h2 class="section-title">প্রশ্ন ও উত্তর</h2>
-                <button id="copyQABtn" class="btn" disabled>
-                    <span>সব কপি করুন</span>
+
+            <div class="result-area">
+                <div class="result-box">
+                    <h3 class="result-title"><i class="fas fa-file-alt"></i> Original Text</h3>
+                    <div id="original-text">
+                        <p>Mitochondria are double-membraned organelles found in the cytoplasm of eukaryotic cells. They are often referred to as the 'powerhouses of the cell' because they generate most of the cell's supply of adenosine triphosphate (ATP), used as a source of chemical energy. Mitochondria are involved in other tasks, such as signaling, cellular differentiation, and cell death, as well as maintaining control of the cell cycle and cell growth.</p>
+                    </div>
+                </div>
+                <div class="result-box">
+                    <h3 class="result-title"><i class="fas fa-star"></i> Simplified Content</h3>
+                    <div id="simplified-text">
+                        <p>Mitochondria are parts of your cells that create energy. They're called the "powerhouses" because they make most of the cell's energy (called ATP). They also help with other important jobs like signaling when cells should grow or die.</p>
+                        
+                        <div style="margin-top: 1.5rem;">
+                            <h4><i class="fas fa-key"></i> Key Points:</h4>
+                            <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                                <li>Mitochondria are found in almost all cells</li>
+                                <li>They create energy (ATP) for the cell</li>
+                                <li>They have two membranes (outer and inner)</li>
+                                <li>They help control cell growth and death</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin: 2rem 0;">
+                <button class="btn btn-primary" id="generate-questions-btn">
+                    <i class="fas fa-spinner fa-spin" id="question-spinner" style="display: none;"></i>
+                    Generate Practice Questions
                 </button>
             </div>
-            <div id="questionsContainer"></div>
-        </div>
-    </div>
+
+            <div class="question-list">
+                <h3 class="result-title"><i class="fas fa-tasks"></i> Generated Questions</h3>
+                
+                <div class="question-item">
+                    <div class="question-text">
+                        <span class="badge badge-primary">MCQ</span>
+                        What is the primary function of mitochondria?
+                    </div>
+                    <div class="options-list">
+                        <div class="option-item">Protein synthesis</div>
+                        <div class="option-item correct">Energy production (ATP)</div>
+                        <div class="option-item">DNA replication</div>
+                        <div class="option-item">Waste elimination</div>
+                    </div>
+                </div>
+                
+                <div class="question-item">
+                    <div class="question-text">
+                        <span class="badge badge-warning">True/False</span>
+                        Mitochondria are found in both eukaryotic and prokaryotic cells.
+                    </div>
+                    <div class="options-list">
+                        <div class="option-item incorrect">True</div>
+                        <div class="option-item correct">False</div>
+                    </div>
+                </div>
+                
+                <div class="question-item">
+                    <div class="question-text">
+                        <span class="badge badge-success">Fill in the blank</span>
+                        Mitochondria are often called the _____ of the cell.
+                    </div>
+                    <div style="margin-top: 0.8rem;">
+                        Correct answer: <strong>powerhouses</strong>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2 style="text-align: center; margin: 3rem 0 2rem; color: var(--secondary);">Powerful Features</h2>
+            <div class="features">
+                <div class="feature">
+                    <div class="feature-icon">
+                        <i class="fas fa-globe"></i>
+                    </div>
+                    <div>
+                        <h3>Multi-language Support</h3>
+                        <p>Works with both English and Bengali content, with more languages coming soon.</p>
+                    </div>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">
+                        <i class="fas fa-download"></i>
+                    </div>
+                    <div>
+                        <h3>Export & Save</h3>
+                        <p>Download your simplified notes and questions as PDF, DOCX, or quiz sets.</p>
+                    </div>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <div>
+                        <h3>Mobile Friendly</h3>
+                        <p>Study on the go with our mobile app for iOS and Android.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2 style="text-align: center; margin: 3rem 0 2rem; color: var(--secondary);">Simple Pricing</h2>
+            <div class="pricing">
+                <div class="pricing-plan">
+                    <h3 class="plan-name">Free</h3>
+                    <div class="plan-price">$0</div>
+                    <ul class="plan-features">
+                        <li>3 pages scan per day</li>
+                        <li>10 question generations</li>
+                        <li>Basic simplification</li>
+                        <li>Text-only exports</li>
+                        <li>Ad-supported</li>
+                    </ul>
+                    <button class="btn btn-secondary">Get Started</button>
+                </div>
+                <div class="pricing-plan popular">
+                    <h3 class="plan-name">Pro</h3>
+                    <div class="plan-price">$7.99/mo</div>
+                    <ul class="plan-features">
+                        <li>Unlimited OCR scanning</li>
+                        <li>Unlimited question generation</li>
+                        <li>Advanced simplification</li>
+                        <li>PDF, DOCX, JSON exports</li>
+                        <li>Ad-free experience</li>
+                        <li>AI exam predictor</li>
+                    </ul>
+                    <button class="btn btn-primary">Try 7 Days Free</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="container">
+        <p>© 2023 SimplifyIQ. All rights reserved.</p>
+        <p>From Complex to Mastery. Study Smarter.</p>
+    </footer>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // DOM elements
-            const uploadArea = document.getElementById('uploadArea');
-            const fileInput = document.getElementById('fileInput');
-            const imagePreview = document.getElementById('imagePreview');
-            const extractBtn = document.getElementById('extractBtn');
-            const extractedText = document.getElementById('extractedText');
-            const generateBtn = document.getElementById('generateBtn');
-            const copyTextBtn = document.getElementById('copyTextBtn');
-            const copyQABtn = document.getElementById('copyQABtn');
-            const questionsContainer = document.getElementById('questionsContainer');
-            const progressContainer = document.getElementById('progressContainer');
-            const progressBar = document.getElementById('progressBar');
-            const statusText = document.getElementById('statusText');
-            const loader = document.getElementById('loader');
+            const simplifyBtn = document.getElementById('simplify-btn');
+            const generateQuestionsBtn = document.getElementById('generate-questions-btn');
+            const spinner = document.getElementById('spinner');
+            const questionSpinner = document.getElementById('question-spinner');
             
-            let extractedBengaliText = '';
-            
-            // Upload area click handler
-            uploadArea.addEventListener('click', function() {
-                fileInput.click();
-            });
-            
-            // Drag and drop handlers
-            uploadArea.addEventListener('dragover', function(e) {
-                e.preventDefault();
-                uploadArea.style.backgroundColor = '#d2e3fc';
-            });
-            
-            uploadArea.addEventListener('dragleave', function() {
-                uploadArea.style.backgroundColor = '';
-            });
-            
-            uploadArea.addEventListener('drop', function(e) {
-                e.preventDefault();
-                uploadArea.style.backgroundColor = '';
+            // Simulate text simplification
+            simplifyBtn.addEventListener('click', function() {
+                spinner.style.display = 'inline-block';
+                simplifyBtn.disabled = true;
                 
-                if (e.dataTransfer.files.length) {
-                    fileInput.files = e.dataTransfer.files;
-                    handleFileSelect(e.dataTransfer.files[0]);
-                }
-            });
-            
-            // File input change handler
-            fileInput.addEventListener('change', function() {
-                if (fileInput.files.length) {
-                    handleFileSelect(fileInput.files[0]);
-                }
-            });
-            
-            // Handle file selection
-            function handleFileSelect(file) {
-                const validTypes = ['image/jpeg', 'image/png'];
-                const maxSize = 5 * 1024 * 1024; // 5MB
-                
-                if (!validTypes.includes(file.type)) {
-                    showError('অনুগ্রহ করে একটি JPEG বা PNG ফাইল আপলোড করুন।');
-                    resetUI();
-                    return;
-                }
-                
-                if (file.size > maxSize) {
-                    showError('ফাইলের আকার খুব বড়। সর্বোচ্চ 5MB আপলোড করা যাবে।');
-                    resetUI();
-                    return;
-                }
-                
-                // Show preview
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    imagePreview.src = e.target.result;
-                    imagePreview.style.display = 'block';
-                    extractBtn.disabled = false;
-                    statusText.textContent = 'প্রস্তুত: ' + file.name;
-                    statusText.className = 'status';
-                };
-                reader.readAsDataURL(file);
-            }
-            
-            // Extract text from image
-            extractBtn.addEventListener('click', function() {
-                if (!fileInput.files.length) return;
-                
-                const imageFile = fileInput.files[0];
-                showStatus('টেক্সট এক্সট্রাক্ট করা হচ্ছে...', 'status');
-                progressContainer.style.display = 'block';
-                loader.style.display = 'block';
-                extractBtn.disabled = true;
-                
-                Tesseract.recognize(
-                    imageFile,
-                    'ben', // Bengali language code
-                    {
-                        logger: m => {
-                            if (m.status === 'recognizing text') {
-                                const progress = Math.round(m.progress * 100);
-                                progressBar.style.width = `${progress}%`;
-                                progressBar.textContent = `${progress}%`;
-                            }
-                        }
-                    }
-                ).then(({ data: { text } }) => {
-                    extractedBengaliText = text.trim();
-                    extractedText.value = extractedBengaliText;
+                setTimeout(function() {
+                    spinner.style.display = 'none';
+                    simplifyBtn.disabled = false;
                     
-                    if (!extractedBengaliText) {
-                        showError('কোন টেক্সট পাওয়া যায়নি। অন্য ছবি চেষ্টা করুন।');
-                        resetUI();
-                        return;
-                    }
-                    
-                    showStatus('টেক্সট সফলভাবে বের করা হয়েছে!', 'status');
-                    progressContainer.style.display = 'none';
-                    loader.style.display = 'none';
-                    generateBtn.disabled = false;
-                    copyTextBtn.disabled = false;
-                }).catch(err => {
-                    showError('ত্রুটি: ' + err.message);
-                    progressContainer.style.display = 'none';
-                    loader.style.display = 'none';
-                    extractBtn.disabled = false;
-                });
+                    // In a real app, we would update the simplified text area with the response from the API
+                    document.getElementById('simplified-text').innerHTML = `
+                        <p>Mitochondria are parts of your cells that create energy. They're called the "powerhouses" because they make most of the cell's energy (called ATP). They also help with other important jobs like signaling when cells should grow or die.</p>
+                        
+                        <div style="margin-top: 1.5rem;">
+                            <h4><i class="fas fa-key"></i> Key Points:</h4>
+                            <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                                <li>Mitochondria are found in almost all cells</li>
+                                <li>They create energy (ATP) for the cell</li>
+                                <li>They have two membranes (outer and inner)</li>
+                                <li>They help control cell growth and death</li>
+                            </ul>
+                        </div>
+                    `;
+                }, 1500);
             });
             
-            // Generate questions with Gemini API
-           // Generate questions using OpenAI API
-generateBtn.addEventListener('click', async function () {
-    if (!extractedBengaliText.trim()) {
-        showError('প্রথমে টেক্সট এক্সট্রাক্ট করুন।');
-        return;
-    }
-
-    showStatus('OpenAI দ্বারা প্রশ্ন তৈরি করা হচ্ছে...', 'status');
-    loader.style.display = 'block';
-    generateBtn.disabled = true;
-
-    try {
-        const API_KEY = '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'; // <-- এখানে আপনার key দিন
-        const API_URL = 'https://api.openai.com/v1/chat/completions';
-
-        const messages = [
-            {
-                role: "system",
-                content: `তুমি একজন পেশাদার বাংলা শিক্ষক। নিচে একটি বাংলা লেখা দেওয়া হলো। তুমি এর উপর ভিত্তি করে ১৫টি প্রশ্ন এবং তাদের উত্তর তৈরি করবে। প্রশ্ন-উত্তর বাংলায় থাকবে এবং নিচের JSON ফরম্যাটে থাকবে:
-
-[
-  { "q": "প্রশ্ন ১", "a": "উত্তর ১" },
-  { "q": "প্রশ্ন ২", "a": "উত্তর ২" },
-  ...
-]
-
-শুধু JSON ফরম্যাটে আউটপুট দাও, ব্যাখ্যা বা অন্য কিছু লিখবে না।`
-            },
-            {
-                role: "user",
-                content: `${extractedBengaliText.substring(0, 3000)}`
-            }
-        ];
-
-        const response = await fetch(API_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${API_KEY}`
-            },
-            body: JSON.stringify({
-                model: 'gpt-3.5-turbo', // আপনি চাইলে gpt-4 করতে পারেন
-                messages: messages,
-                temperature: 0.7
-            })
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error?.message || 'API call failed');
-        }
-
-        const data = await response.json();
-        const rawText = data.choices[0].message.content;
-
-        let questions = [];
-
-        try {
-            const start = rawText.indexOf('[');
-            const end = rawText.lastIndexOf(']');
-            const jsonText = rawText.slice(start, end + 1);
-            questions = JSON.parse(jsonText);
-        } catch (e) {
-            console.warn('Parsing failed. Using regex fallback.');
-
-            const qaPairs = rawText.split(/(?=\d+\.\s*প্রশ্ন:)/);
-            qaPairs.forEach(pair => {
-                const match = pair.match(/প্রশ্ন:\s*(.*?)\s*উত্তর:\s*(.*)/s);
-                if (match && match[1] && match[2]) {
-                    questions.push({
-                        question: match[1].trim(),
-                        answer: match[2].trim().replace(/\n+/g, ' ')
-                    });
-                }
-            });
-        }
-
-        // Fill up to 15
-        while (questions.length < 15) {
-            questions.push({
-                question: `অতিরিক্ত প্রশ্ন ${questions.length + 1}`,
-                answer: "এই প্রশ্নের উত্তর পাঠ্যে দেওয়া আছে।"
-            });
-        }
-
-        displayQuestions(questions.slice(0, 15));
-        showStatus('১৫টি প্রশ্নোত্তর সফলভাবে তৈরি হয়েছে ✅', 'status');
-        copyQABtn.disabled = false;
-
-    } catch (error) {
-        console.error('API Error:', error);
-        showError(`ত্রুটি: ${error.message || 'প্রশ্ন তৈরি করতে সমস্যা হয়েছে'}`);
-        displaySampleQuestions();
-    } finally {
-        loader.style.display = 'none';
-        generateBtn.disabled = false;
-    }
-});
-
-                }
-            });
-            
-            // Display questions
-            function displayQuestions(questions) {
-                questionsContainer.innerHTML = '';
+            // Simulate question generation
+            generateQuestionsBtn.addEventListener('click', function() {
+                questionSpinner.style.display = 'inline-block';
+                generateQuestionsBtn.disabled = true;
                 
-                questions.forEach((q, index) => {
-                    const questionItem = document.createElement('div');
-                    questionItem.className = 'question-item';
+                setTimeout(function() {
+                    questionSpinner.style.display = 'none';
+                    generateQuestionsBtn.disabled = false;
                     
-                    const questionElem = document.createElement('div');
-                    questionElem.className = 'question';
-                    questionElem.innerHTML = `<strong>${index + 1}. ${q.question}</strong>`;
-                    
-                    const answerElem = document.createElement('div');
-                    answerElem.className = 'answer';
-                    answerElem.innerHTML = `<strong>উত্তর:</strong> ${q.answer}`;
-                    
-                    questionItem.appendChild(questionElem);
-                    questionItem.appendChild(answerElem);
-                    questionsContainer.appendChild(questionItem);
-                });
-            }
-            
-            // Fallback sample questions
-            function displaySampleQuestions() {
-                const sampleQuestions = [
-                    {
-                        question: "পাঠ্যের মূল বিষয় কী?",
-                        answer: "পাঠ্যের মূল বিষয় সম্পর্কে বিশদ বিবরণ দেওয়া হয়েছে"
-                    },
-                    {
-                        question: "প্রথম অনুচ্ছেদে কী বলা হয়েছে?",
-                        answer: "প্রথম অনুচ্ছেদে মূল ধারণা উপস্থাপন করা হয়েছে"
-                    },
-                    {
-                        question: "লেখক কী ব্যাখ্যা করার চেষ্টা করছেন?",
-                        answer: "লেখক একটি গুরুত্বপূর্ণ বিষয় স্পষ্ট করতে চেয়েছেন"
-                    },
-                    {
-                        question: "পাঠ্যে উল্লিখিত প্রধান চরিত্র কে?",
-                        answer: "প্রধান চরিত্র সম্পর্কে পাঠ্যে বর্ণনা দেওয়া হয়েছে"
-                    },
-                    {
-                        question: "এই পাঠ্যের মূল শিক্ষা কী?",
-                        answer: "পাঠ্য থেকে আমরা গুরুত্বপূর্ণ জ্ঞান অর্জন করতে পারি"
-                    }
-                ];
-                
-                // Fill up to 15 questions
-                while (sampleQuestions.length < 15) {
-                    sampleQuestions.push({
-                        question: `পাঠ্যের গুরুত্বপূর্ণ দিক ${sampleQuestions.length + 1}`,
-                        answer: "এটি পাঠ্যের একটি সূক্ষ্ম বিশ্লেষণ প্রয়োজন"
-                    });
-                }
-                
-                displayQuestions(sampleQuestions.slice(0, 15));
-            }
-            
-            // Copy text to clipboard
-            copyTextBtn.addEventListener('click', function() {
-                extractedText.select();
-                document.execCommand('copy');
-                showStatus('টেক্সট কপি করা হয়েছে!', 'status');
-                setTimeout(() => {
-                    statusText.textContent = '';
+                    // In a real app, we would update the questions area with the response from the API
+                    document.querySelector('.question-list').style.display = 'block';
                 }, 2000);
             });
             
-            // Copy all Q&A to clipboard
-            copyQABtn.addEventListener('click', function() {
-                const questions = Array.from(document.querySelectorAll('.question-item'));
-                let textToCopy = '';
-                
-                questions.forEach((q, index) => {
-                    textToCopy += `${index + 1}. ${q.querySelector('.question').textContent}\n`;
-                    textToCopy += `উত্তর: ${q.querySelector('.answer').textContent.replace('উত্তর:', '').trim()}\n\n`;
+            // Option chips selection
+            const optionChips = document.querySelectorAll('.option-chip');
+            optionChips.forEach(chip => {
+                chip.addEventListener('click', function() {
+                    // Remove active class from all chips in the same group
+                    const parent = this.closest('.options');
+                    if (parent) {
+                        parent.querySelectorAll('.option-chip').forEach(c => {
+                            c.classList.remove('active');
+                        });
+                    }
+                    
+                    // Add active class to clicked chip
+                    this.classList.add('active');
                 });
-                
-                navigator.clipboard.writeText(textToCopy.trim())
-                    .then(() => {
-                        showStatus('সমস্ত প্রশ্নোত্তর কপি করা হয়েছে!', 'status');
-                        setTimeout(() => {
-                            statusText.textContent = '';
-                        }, 2000);
-                    })
-                    .catch(err => {
-                        showError('কপি করতে সমস্যা হয়েছে: ' + err);
-                    });
             });
-            
-            // Helper functions
-            function showStatus(message, className = 'status') {
-                statusText.textContent = message;
-                statusText.className = className;
-            }
-            
-            function showError(message) {
-                statusText.textContent = message;
-                statusText.className = 'status error';
-            }
-            
-            function resetUI() {
-                imagePreview.style.display = 'none';
-                imagePreview.src = '';
-                fileInput.value = '';
-                extractBtn.disabled = true;
-                generateBtn.disabled = true;
-                copyTextBtn.disabled = true;
-                copyQABtn.disabled = true;
-                extractedText.value = '';
-                questionsContainer.innerHTML = '';
-                progressContainer.style.display = 'none';
-                loader.style.display = 'none';
-            }
         });
     </script>
 </body>
