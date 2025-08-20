@@ -1,747 +1,520 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SimplifyIQ - Study Smarter</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Exam Simplifier - আপনার পড়াশোনাকে সহজ করে তুলুন</title>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Hind Siliguri', sans-serif;
         }
-        
-        :root {
-            --primary: #4361ee;
-            --secondary: #3a0ca3;
-            --accent: #f72585;
-            --light: #f8f9fa;
-            --dark: #212529;
-            --success: #4cc9f0;
-            --warning: #ffbe0b;
-            --danger: #ef233c;
-            --gray: #6c757d;
-            --light-gray: #e9ecef;
-        }
-        
+
         body {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            color: var(--dark);
+            background-color: #f5f7fa;
+            color: #333;
             line-height: 1.6;
-            min-height: 100vh;
-            padding-bottom: 2rem;
         }
-        
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 0 1.5rem;
+            padding: 20px;
         }
-        
+
         header {
-            background: linear-gradient(to right, var(--primary), var(--secondary));
-            color: white;
-            padding: 1.5rem 0;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-        
-        .header-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-        
-        .logo i {
-            font-size: 2rem;
-        }
-        
-        .logo h1 {
-            font-weight: 700;
-            font-size: 1.8rem;
-        }
-        
-        nav ul {
-            display: flex;
-            list-style: none;
-            gap: 2rem;
-        }
-        
-        nav a {
-            color: white;
-            text-decoration: none;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-        
-        nav a:hover {
-            color: var(--warning);
-        }
-        
-        .cta-button {
-            background-color: var(--accent);
-            color: white;
-            border: none;
-            padding: 0.6rem 1.5rem;
-            border-radius: 50px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .cta-button:hover {
-            background-color: #d81159;
-            transform: translateY(-2px);
-        }
-        
-        .hero {
             text-align: center;
-            padding: 4rem 0;
-            max-width: 800px;
-            margin: 0 auto;
+            padding: 20px 0;
+            background: linear-gradient(135deg, #4b6cb7 0%, #182848 100%);
+            color: white;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
-        
-        .hero h2 {
-            font-size: 2.8rem;
-            margin-bottom: 1.5rem;
-            color: var(--secondary);
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
         }
-        
-        .hero p {
+
+        header p {
             font-size: 1.2rem;
-            color: var(--gray);
-            margin-bottom: 2rem;
+            opacity: 0.9;
         }
-        
-        .card {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-            padding: 2rem;
-            margin-bottom: 2rem;
-            transition: transform 0.3s ease;
-        }
-        
-        .card:hover {
-            transform: translateY(-5px);
-        }
-        
-        .card-header {
+
+        .features {
             display: flex;
+            flex-wrap: wrap;
             justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 2px solid var(--light-gray);
+            margin-bottom: 30px;
         }
-        
-        .card-title {
-            font-size: 1.5rem;
-            color: var(--primary);
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-        
-        .process-steps {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            margin: 3rem 0;
-        }
-        
-        .step {
+
+        .feature-box {
+            flex: 0 0 32%;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
             text-align: center;
-            padding: 2rem;
+            margin-bottom: 20px;
         }
-        
-        .step-icon {
-            background: var(--primary);
-            color: white;
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.8rem;
-            margin: 0 auto 1.5rem;
+
+        .feature-box i {
+            font-size: 2.5rem;
+            color: #4b6cb7;
+            margin-bottom: 15px;
         }
-        
-        .step h3 {
-            font-size: 1.4rem;
-            margin-bottom: 1rem;
-            color: var(--secondary);
+
+        .feature-box h3 {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            color: #182848;
         }
-        
+
+        .upload-section {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
         .upload-area {
-            border: 3px dashed var(--primary);
-            border-radius: 12px;
-            padding: 3rem;
-            text-align: center;
-            margin: 2rem 0;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .upload-area:hover {
-            background-color: rgba(67, 97, 238, 0.05);
-        }
-        
-        .upload-icon {
-            font-size: 3.5rem;
-            color: var(--primary);
-            margin-bottom: 1rem;
-        }
-        
-        .btn {
-            padding: 0.8rem 1.8rem;
+            border: 2px dashed #4b6cb7;
             border-radius: 8px;
+            padding: 40px 20px;
+            margin: 20px 0;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .upload-area:hover {
+            background-color: #f0f4ff;
+        }
+
+        .upload-area i {
+            font-size: 3rem;
+            color: #4b6cb7;
+            margin-bottom: 15px;
+        }
+
+        .upload-area p {
+            margin-bottom: 15px;
+        }
+
+        #file-input {
+            display: none;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #4b6cb7 0%, #182848 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
-            border: none;
-            transition: all 0.3s ease;
+            transition: all 0.3s;
+            display: inline-block;
+            margin: 10px 5px;
         }
-        
-        .btn-primary {
-            background: var(--primary);
-            color: white;
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
-        
-        .btn-primary:hover {
-            background: var(--secondary);
+
+        .btn:active {
+            transform: translateY(0);
         }
-        
+
         .btn-secondary {
-            background: var(--light-gray);
-            color: var(--dark);
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: #182848;
         }
-        
-        .btn-secondary:hover {
-            background: #dcdedf;
+
+        .result-section {
+            display: none;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
         }
-        
-        .options {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-            margin: 1.5rem 0;
+
+        .result-section h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #182848;
         }
-        
-        .option-chip {
-            background: var(--light-gray);
-            padding: 0.6rem 1.2rem;
-            border-radius: 50px;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .option-chip.active {
-            background: var(--primary);
-            color: white;
-        }
-        
-        .result-area {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-            margin: 2rem 0;
-        }
-        
-        .result-box {
-            background: var(--light);
+
+        .extracted-text {
+            background: #f5f7fa;
+            padding: 20px;
             border-radius: 8px;
-            padding: 1.5rem;
-            min-height: 300px;
-            max-height: 500px;
+            margin-bottom: 20px;
+            max-height: 200px;
             overflow-y: auto;
         }
-        
-        .result-title {
-            font-size: 1.2rem;
-            margin-bottom: 1rem;
-            color: var(--secondary);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
+
+        .quiz-container {
+            margin-top: 20px;
         }
-        
-        .question-list {
-            margin-top: 1.5rem;
-        }
-        
-        .question-item {
-            background: white;
+
+        .question {
+            background: #f5f7fa;
+            padding: 20px;
             border-radius: 8px;
-            padding: 1.2rem;
-            margin-bottom: 1rem;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
         }
-        
-        .question-text {
-            font-weight: 600;
-            margin-bottom: 0.8rem;
-        }
-        
-        .options-list {
+
+        .options {
             display: grid;
-            gap: 0.5rem;
-            margin: 0.8rem 0;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
         }
-        
-        .option-item {
-            padding: 0.6rem;
-            background: var(--light-gray);
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .option-item:hover {
-            background: #dcdedf;
-        }
-        
-        .option-item.correct {
-            background: #d1e7dd;
-            color: #0f5132;
-        }
-        
-        .option-item.incorrect {
-            background: #f8d7da;
-            color: #842029;
-        }
-        
-        .badge {
-            display: inline-block;
-            padding: 0.35rem 0.65rem;
-            border-radius: 50px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            margin-right: 0.5rem;
-        }
-        
-        .badge-primary {
-            background: var(--primary);
-            color: white;
-        }
-        
-        .badge-success {
-            background: var(--success);
-            color: white;
-        }
-        
-        .badge-warning {
-            background: var(--warning);
-            color: var(--dark);
-        }
-        
-        .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            margin: 3rem 0;
-        }
-        
-        .feature {
-            display: flex;
-            gap: 1rem;
-        }
-        
-        .feature-icon {
-            color: var(--primary);
-            font-size: 2rem;
-        }
-        
-        .pricing {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            margin: 3rem 0;
-        }
-        
-        .pricing-plan {
-            background: white;
-            border-radius: 12px;
-            padding: 2.5rem 2rem;
-            text-align: center;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .pricing-plan.popular::before {
-            content: 'MOST POPULAR';
-            position: absolute;
-            top: 0;
-            right: 0;
-            background: var(--accent);
-            color: white;
-            font-size: 0.7rem;
-            font-weight: 700;
-            padding: 0.4rem 1.5rem;
-            transform: rotate(45deg) translateX(1.3rem) translateY(-1.5rem);
-            width: 150px;
-        }
-        
-        .plan-name {
-            font-size: 1.5rem;
-            color: var(--secondary);
-            margin-bottom: 1rem;
-        }
-        
-        .plan-price {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: var(--primary);
-            margin-bottom: 2rem;
-        }
-        
-        .plan-features {
-            list-style: none;
-            margin-bottom: 2rem;
-        }
-        
-        .plan-features li {
-            padding: 0.6rem 0;
-            border-bottom: 1px solid var(--light-gray);
-        }
-        
-        footer {
-            text-align: center;
-            margin-top: 4rem;
-            padding: 2rem 0;
-            color: var(--gray);
-        }
-        
+
         @media (max-width: 768px) {
-            .result-area {
+            .options {
                 grid-template-columns: 1fr;
             }
-            
-            .header-content {
-                flex-direction: column;
-                gap: 1rem;
+        }
+
+        .option {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option:hover {
+            background: #e6eeff;
+        }
+
+        .option.correct {
+            background: #d4edda;
+            border-color: #c3e6cb;
+        }
+
+        .option.incorrect {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+        }
+
+        .download-options {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .loading-spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #4b6cb7;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .feature-box {
+                flex: 0 0 100%;
             }
             
-            nav ul {
-                gap: 1rem;
-            }
-            
-            .hero h2 {
-                font-size: 2.2rem;
+            header h1 {
+                font-size: 2rem;
             }
         }
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <header>
-        <div class="container">
-            <div class="header-content">
-                <div class="logo">
-                    <i class="fas fa-brain"></i>
-                    <h1>SimplifyIQ</h1>
-                </div>
-                <nav>
-                    <ul>
-                        <li><a href="#">Home</a></li>
-                        <li><a href="#">How It Works</a></li>
-                        <li><a href="#">Pricing</a></li>
-                        <li><a href="#">Contact</a></li>
-                    </ul>
-                </nav>
-                <button class="cta-button">Get Started</button>
+    <div class="container">
+        <header>
+            <h1>Exam Simplifier</h1>
+            <p>আপনার পড়াশোনাকে সহজ করে তুলুন AI এর সাহায্যে</p>
+        </header>
+
+        <div class="features">
+            <div class="feature-box">
+                <i class="fas fa-upload"></i>
+                <h3>ছবি আপলোড করুন</h3>
+                <p>বাংলা বইয়ের পাতা বা হাতে লেখা নোট আপলোড করুন</p>
+            </div>
+            <div class="feature-box">
+                <i class="fas fa-text-height"></i>
+                <h3>টেক্সট এক্সট্র্যাক্ট করুন</h3>
+                <p>AI এর সাহায্যে ছবি থেকে বাংলা টেক্সট বের করুন</p>
+            </div>
+            <div class="feature-box">
+                <i class="fas fa-question-circle"></i>
+                <h3>MCQ জেনারেট করুন</h3>
+                <p>স্বয়ংক্রিয়ভাবে তৈরি করুন বহু নির্বাচনী প্রশ্ন</p>
             </div>
         </div>
-    </header>
 
-    <main class="container">
-        <section class="hero">
-            <h2>From Complex to Mastery.<br>Study Smarter.</h2>
-            <p>SimplifyIQ uses AI to transform complex textbook material into easy-to-understand language and generates practice questions to help you ace your exams.</p>
-            <button class="cta-button">Try It Free</button>
-        </section>
+        <div class="upload-section">
+            <h2>আপনার ছবি আপলোড করুন</h2>
+            <p>আমরা PNG, JPG, JPEG এবং PDF (ইমেজ হিসেবে) ফাইল সাপোর্ট করি</p>
+            
+            <div class="upload-area" id="upload-area">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <p>এখানে ক্লিক করে ছবি আপলোড করুন বা ফাইলটি ড্র্যাগ এন্ড ড্রপ করুন</p>
+                <p class="file-name" id="file-name">কোন ফাইল নির্বাচন করা হয়নি</p>
+            </div>
+            
+            <input type="file" id="file-input" accept="image/*">
+            
+            <button class="btn" id="generate-btn">MCQ জেনারেট করুন</button>
+        </div>
 
-        <section class="process-steps">
-            <div class="step">
-                <div class="step-icon">
-                    <i class="fas fa-upload"></i>
-                </div>
-                <h3>Upload Content</h3>
-                <p>Upload your textbook pages, notes, or PDFs. We support both English and Bengali.</p>
-            </div>
-            <div class="step">
-                <div class="step-icon">
-                    <i class="fas fa-language"></i>
-                </div>
-                <h3>Simplify Text</h3>
-                <p>AI simplifies complex text into easy-to-understand language with key points.</p>
-            </div>
-            <div class="step">
-                <div class="step-icon">
-                    <i class="fas fa-question-circle"></i>
-                </div>
-                <h3>Generate Questions</h3>
-                <p>Get MCQs, True/False, Short Answer, and Fill-in-the-blank questions.</p>
-            </div>
-        </section>
+        <div class="loading" id="loading">
+            <div class="loading-spinner"></div>
+            <p>আপনার রিকোয়েস্ট প্রসেস করা হচ্ছে, অনুগ্রহ করে অপেক্ষা করুন...</p>
+        </div>
 
-        <section class="card">
-            <div class="card-header">
-                <h2 class="card-title"><i class="fas fa-magic"></i> AI Study Assistant</h2>
-                <div class="options">
-                    <div class="option-chip active">
-                        <i class="fas fa-file-pdf"></i> PDF
-                    </div>
-                    <div class="option-chip">
-                        <i class="fas fa-image"></i> Image
-                    </div>
-                    <div class="option-chip">
-                        <i class="fas fa-font"></i> Text
-                    </div>
-                </div>
+        <div class="result-section" id="result-section">
+            <h2>এক্সট্র্যাক্ট করা টেক্সট</h2>
+            <div class="extracted-text" id="extracted-text">
+                এক্সট্র্যাক্ট করা টেক্সট এখানে দেখানো হবে...
             </div>
-
-            <div class="upload-area">
-                <div class="upload-icon">
-                    <i class="fas fa-cloud-upload-alt"></i>
-                </div>
-                <h3>Upload your study material</h3>
-                <p>Drag & drop your file here or click to browse</p>
-                <p class="small">Supported formats: PDF, JPG, PNG, TXT (Max 25MB)</p>
+            
+            <h2>জেনারেট করা MCQ প্রশ্ন</h2>
+            <div class="quiz-container" id="quiz-container">
+                <!-- MCQ questions will be inserted here -->
             </div>
-
-            <div class="options">
-                <div class="option-chip active">
-                    <i class="fas fa-bolt"></i> Simple
-                </div>
-                <div class="option-chip">
-                    <i class="fas fa-balance-scale"></i> Medium
-                </div>
-                <div class="option-chip">
-                    <i class="fas fa-graduation-cap"></i> Exam-Level
-                </div>
+            
+            <div class="download-options">
+                <button class="btn btn-secondary" id="copy-questions">প্রশ্নগুলি কপি করুন</button>
+                <button class="btn btn-secondary" id="download-questions">প্রশ্নগুলি ডাউনলোড করুন</button>
             </div>
+        </div>
+    </div>
 
-            <div style="text-align: center; margin: 2rem 0;">
-                <button class="btn btn-primary" id="simplify-btn">
-                    <i class="fas fa-spinner fa-spin" id="spinner" style="display: none;"></i>
-                    Simplify Content
-                </button>
-            </div>
-
-            <div class="result-area">
-                <div class="result-box">
-                    <h3 class="result-title"><i class="fas fa-file-alt"></i> Original Text</h3>
-                    <div id="original-text">
-                        <p>Mitochondria are double-membraned organelles found in the cytoplasm of eukaryotic cells. They are often referred to as the 'powerhouses of the cell' because they generate most of the cell's supply of adenosine triphosphate (ATP), used as a source of chemical energy. Mitochondria are involved in other tasks, such as signaling, cellular differentiation, and cell death, as well as maintaining control of the cell cycle and cell growth.</p>
-                    </div>
-                </div>
-                <div class="result-box">
-                    <h3 class="result-title"><i class="fas fa-star"></i> Simplified Content</h3>
-                    <div id="simplified-text">
-                        <p>Mitochondria are parts of your cells that create energy. They're called the "powerhouses" because they make most of the cell's energy (called ATP). They also help with other important jobs like signaling when cells should grow or die.</p>
-                        
-                        <div style="margin-top: 1.5rem;">
-                            <h4><i class="fas fa-key"></i> Key Points:</h4>
-                            <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
-                                <li>Mitochondria are found in almost all cells</li>
-                                <li>They create energy (ATP) for the cell</li>
-                                <li>They have two membranes (outer and inner)</li>
-                                <li>They help control cell growth and death</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div style="text-align: center; margin: 2rem 0;">
-                <button class="btn btn-primary" id="generate-questions-btn">
-                    <i class="fas fa-spinner fa-spin" id="question-spinner" style="display: none;"></i>
-                    Generate Practice Questions
-                </button>
-            </div>
-
-            <div class="question-list">
-                <h3 class="result-title"><i class="fas fa-tasks"></i> Generated Questions</h3>
-                
-                <div class="question-item">
-                    <div class="question-text">
-                        <span class="badge badge-primary">MCQ</span>
-                        What is the primary function of mitochondria?
-                    </div>
-                    <div class="options-list">
-                        <div class="option-item">Protein synthesis</div>
-                        <div class="option-item correct">Energy production (ATP)</div>
-                        <div class="option-item">DNA replication</div>
-                        <div class="option-item">Waste elimination</div>
-                    </div>
-                </div>
-                
-                <div class="question-item">
-                    <div class="question-text">
-                        <span class="badge badge-warning">True/False</span>
-                        Mitochondria are found in both eukaryotic and prokaryotic cells.
-                    </div>
-                    <div class="options-list">
-                        <div class="option-item incorrect">True</div>
-                        <div class="option-item correct">False</div>
-                    </div>
-                </div>
-                
-                <div class="question-item">
-                    <div class="question-text">
-                        <span class="badge badge-success">Fill in the blank</span>
-                        Mitochondria are often called the _____ of the cell.
-                    </div>
-                    <div style="margin-top: 0.8rem;">
-                        Correct answer: <strong>powerhouses</strong>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section>
-            <h2 style="text-align: center; margin: 3rem 0 2rem; color: var(--secondary);">Powerful Features</h2>
-            <div class="features">
-                <div class="feature">
-                    <div class="feature-icon">
-                        <i class="fas fa-globe"></i>
-                    </div>
-                    <div>
-                        <h3>Multi-language Support</h3>
-                        <p>Works with both English and Bengali content, with more languages coming soon.</p>
-                    </div>
-                </div>
-                <div class="feature">
-                    <div class="feature-icon">
-                        <i class="fas fa-download"></i>
-                    </div>
-                    <div>
-                        <h3>Export & Save</h3>
-                        <p>Download your simplified notes and questions as PDF, DOCX, or quiz sets.</p>
-                    </div>
-                </div>
-                <div class="feature">
-                    <div class="feature-icon">
-                        <i class="fas fa-mobile-alt"></i>
-                    </div>
-                    <div>
-                        <h3>Mobile Friendly</h3>
-                        <p>Study on the go with our mobile app for iOS and Android.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section>
-            <h2 style="text-align: center; margin: 3rem 0 2rem; color: var(--secondary);">Simple Pricing</h2>
-            <div class="pricing">
-                <div class="pricing-plan">
-                    <h3 class="plan-name">Free</h3>
-                    <div class="plan-price">$0</div>
-                    <ul class="plan-features">
-                        <li>3 pages scan per day</li>
-                        <li>10 question generations</li>
-                        <li>Basic simplification</li>
-                        <li>Text-only exports</li>
-                        <li>Ad-supported</li>
-                    </ul>
-                    <button class="btn btn-secondary">Get Started</button>
-                </div>
-                <div class="pricing-plan popular">
-                    <h3 class="plan-name">Pro</h3>
-                    <div class="plan-price">$7.99/mo</div>
-                    <ul class="plan-features">
-                        <li>Unlimited OCR scanning</li>
-                        <li>Unlimited question generation</li>
-                        <li>Advanced simplification</li>
-                        <li>PDF, DOCX, JSON exports</li>
-                        <li>Ad-free experience</li>
-                        <li>AI exam predictor</li>
-                    </ul>
-                    <button class="btn btn-primary">Try 7 Days Free</button>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <footer class="container">
-        <p>© 2023 SimplifyIQ. All rights reserved.</p>
-        <p>From Complex to Mastery. Study Smarter.</p>
+    <footer>
+        <p>© 2023 Exam Simplifier - AI পাওয়ার্ড এডুকেশনাল টুল</p>
     </footer>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const simplifyBtn = document.getElementById('simplify-btn');
-            const generateQuestionsBtn = document.getElementById('generate-questions-btn');
-            const spinner = document.getElementById('spinner');
-            const questionSpinner = document.getElementById('question-spinner');
+            const fileInput = document.getElementById('file-input');
+            const uploadArea = document.getElementById('upload-area');
+            const fileName = document.getElementById('file-name');
+            const generateBtn = document.getElementById('generate-btn');
+            const loading = document.getElementById('loading');
+            const resultSection = document.getElementById('result-section');
+            const extractedText = document.getElementById('extracted-text');
+            const quizContainer = document.getElementById('quiz-container');
+            const copyQuestionsBtn = document.getElementById('copy-questions');
+            const downloadQuestionsBtn = document.getElementById('download-questions');
             
-            // Simulate text simplification
-            simplifyBtn.addEventListener('click', function() {
-                spinner.style.display = 'inline-block';
-                simplifyBtn.disabled = true;
+            let extractedTextContent = "";
+            let mcqQuestions = [];
+            
+            // Upload area click handler
+            uploadArea.addEventListener('click', function() {
+                fileInput.click();
+            });
+            
+            // Drag and drop functionality
+            uploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                uploadArea.style.backgroundColor = '#f0f4ff';
+            });
+            
+            uploadArea.addEventListener('dragleave', function() {
+                uploadArea.style.backgroundColor = '';
+            });
+            
+            uploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                uploadArea.style.backgroundColor = '';
                 
-                setTimeout(function() {
-                    spinner.style.display = 'none';
-                    simplifyBtn.disabled = false;
+                if (e.dataTransfer.files.length) {
+                    fileInput.files = e.dataTransfer.files;
+                    updateFileName();
+                }
+            });
+            
+            // File input change handler
+            fileInput.addEventListener('change', updateFileName);
+            
+            function updateFileName() {
+                if (fileInput.files.length) {
+                    fileName.textContent = fileInput.files[0].name;
+                } else {
+                    fileName.textContent = "কোন ফাইল নির্বাচন করা হয়নি";
+                }
+            }
+            
+            // Generate button click handler
+            generateBtn.addEventListener('click', function() {
+                if (!fileInput.files.length) {
+                    alert('অনুগ্রহ করে একটি ছবি আপলোড করুন');
+                    return;
+                }
+                
+                loading.style.display = 'block';
+                resultSection.style.display = 'none';
+                
+                // Simulate API calls for demonstration
+                // In a real implementation, you would call the Gemini API here
+                AIzaSyC1TLMOvMPXqfqSVHqjmFXVJSF72V9MMH8();
+            });
+            
+            function simulateTextExtraction() {
+                // This is a simulation - in reality, you would call the Gemini API
+               AIzaSyC1TLMOvMPXqfqSVHqjmFXVJSF72V9MMH8(() => {
+                    extractedTextContent = "বাংলাদেশ দক্ষিণ এশিয়ার একটি জনবহুল দেশ। এটি ১৯৭১ সালে পাকিস্তান থেকে স্বাধীনতা লাভ করে। বাংলাদেশের রাজধানীর নাম ঢাকা। বাংলাদেশের অর্থনীতি কৃষি, তৈরি পোশাক শিল্প এবং remittance এর উপর অনেকটা নির্ভরশীল। বাংলাদেশের জাতীয় ফুল হল শাপলা, জাতীয় পাখি দোয়েল, এবং জাতীয়动物 বাঘ।";
                     
-                    // In a real app, we would update the simplified text area with the response from the API
-                    document.getElementById('simplified-text').innerHTML = `
-                        <p>Mitochondria are parts of your cells that create energy. They're called the "powerhouses" because they make most of the cell's energy (called ATP). They also help with other important jobs like signaling when cells should grow or die.</p>
-                        
-                        <div style="margin-top: 1.5rem;">
-                            <h4><i class="fas fa-key"></i> Key Points:</h4>
-                            <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
-                                <li>Mitochondria are found in almost all cells</li>
-                                <li>They create energy (ATP) for the cell</li>
-                                <li>They have two membranes (outer and inner)</li>
-                                <li>They help control cell growth and death</li>
-                            </ul>
+                    extractedText.textContent = extractedTextContent;
+                    simulateMCQGeneration();
+                }, 2000);
+            }
+            
+            function simulateMCQGeneration() {
+                // This is a simulation - in reality, you would call the Gemini API
+                AIzaSyC1TLMOvMPXqfqSVHqjmFXVJSF72V9MMH8(() => {
+                    mcqQuestions = [
+                        {
+                            question: "বাংলাদেশ কোন বছরে স্বাধীনতা লাভ করে?",
+                            options: ["১৯৬৫", "১৯৭১", "১৯৫২", "১৯৮১"],
+                            correct: 1
+                        },
+                        {
+                            question: "বাংলাদেশের রাজধানীর নাম কি?",
+                            options: ["চittাগong", "রাজশাহী", "খুলনা", "ঢাকা"],
+                            correct: 3
+                        },
+                        {
+                            question: "বাংলাদেশের জাতীয় ফুল কি?",
+                            options: ["গোলাপ", "শাপলা", "কমল", "বেলি"],
+                            correct: 1
+                        },
+                        {
+                            question: "বাংলাদেশের জাতীয় পাখির নাম কি?",
+                            options: ["চিল", "কাক", "দোয়েল", "ময়ূর"],
+                            correct: 2
+                        },
+                        {
+                            question: "বাংলাদেশের অর্থনীতি প্রধানত কি উপর নির্ভরশীল?",
+                            options: ["তৈল", "প্রযুক্তি", "কৃষি ও তৈরি পোশাক", "খনিজ"],
+                            correct: 2
+                        }
+                    ];
+                    
+                    displayMCQQuestions();
+                    
+                    loading.style.display = 'none';
+                    resultSection.style.display = 'block';
+                }, 2000);
+            }
+            
+            function displayMCQQuestions() {
+                quizContainer.innerHTML = '';
+                
+                mcqQuestions.forEach((q, index) => {
+                    const questionEl = document.createElement('div');
+                    questionEl.className = 'question';
+                    
+                    questionEl.innerHTML = `
+                        <h3>${index + 1}. ${q.question}</h3>
+                        <div class="options">
+                            ${q.options.map((option, optIndex) => 
+                                `<div class="option" data-index="${optIndex}" data-question="${index}">${option}</div>`
+                            ).join('')}
                         </div>
                     `;
-                }, 1500);
-            });
-            
-            // Simulate question generation
-            generateQuestionsBtn.addEventListener('click', function() {
-                questionSpinner.style.display = 'inline-block';
-                generateQuestionsBtn.disabled = true;
-                
-                setTimeout(function() {
-                    questionSpinner.style.display = 'none';
-                    generateQuestionsBtn.disabled = false;
                     
-                    // In a real app, we would update the questions area with the response from the API
-                    document.querySelector('.question-list').style.display = 'block';
-                }, 2000);
-            });
-            
-            // Option chips selection
-            const optionChips = document.querySelectorAll('.option-chip');
-            optionChips.forEach(chip => {
-                chip.addEventListener('click', function() {
-                    // Remove active class from all chips in the same group
-                    const parent = this.closest('.options');
-                    if (parent) {
-                        parent.querySelectorAll('.option-chip').forEach(c => {
-                            c.classList.remove('active');
-                        });
-                    }
-                    
-                    // Add active class to clicked chip
-                    this.classList.add('active');
+                    quizContainer.appendChild(questionEl);
                 });
+                
+                // Add event listeners to options
+                document.querySelectorAll('.option').forEach(option => {
+                    option.addEventListener('click', function() {
+                        const questionIndex = parseInt(this.getAttribute('data-question'));
+                        const selectedIndex = parseInt(this.getAttribute('data-index'));
+                        const correctIndex = mcqQuestions[questionIndex].correct;
+                        
+                        // Remove any existing classes
+                        this.parentElement.querySelectorAll('.option').forEach(opt => {
+                            opt.classList.remove('correct', 'incorrect');
+                        });
+                        
+                        // Check if correct
+                        if (selectedIndex === correctIndex) {
+                            this.classList.add('correct');
+                        } else {
+                            this.classList.add('incorrect');
+                            // Also highlight the correct answer
+                            this.parentElement.querySelector(`.option[data-index="${correctIndex}"]`).classList.add('correct');
+                        }
+                    });
+                });
+            }
+            
+            // Copy questions button
+            copyQuestionsBtn.addEventListener('click', function() {
+                const questionsText = mcqQuestions.map((q, index) => {
+                    return `${index + 1}. ${q.question}\n${q.options.map((opt, i) => `   ${String.fromCharCode(65 + i)}. ${opt}`).join('\n')}\nসঠিক উত্তর: ${String.fromCharCode(65 + q.correct)}\n`;
+                }).join('\n');
+                
+                navigator.clipboard.writeText(questionsText)
+                    .then(() => {
+                        alert('প্রশ্নগুলি কপি করা হয়েছে!');
+                    })
+                    .catch(err => {
+                        console.error('কপি করতে সমস্যা হয়েছে: ', err);
+                    });
+            });
+            
+            // Download questions button
+            downloadQuestionsBtn.addEventListener('click', function() {
+                const questionsText = mcqQuestions.map((q, index) => {
+                    return `${index + 1}. ${q.question}\n${q.options.map((opt, i) => `   ${String.fromCharCode(65 + i)}. ${opt}`).join('\n')}\nসঠিক উত্তর: ${String.fromCharCode(65 + q.correct)}\n`;
+                }).join('\n');
+                
+                const blob = new Blob([questionsText], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'exam_simplifier_questions.txt';
+                document.body.appendChild(a);
+                a.click();
+                
+                // Clean up
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }, 100);
             });
         });
     </script>
