@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Exam Simplifier - আপনার পড়াশোনাকে সহজ করে তুলুন</title>
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@google/generative-ai/dist/index.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -138,6 +139,11 @@
             color: #182848;
         }
 
+        .btn:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+
         .result-section {
             display: none;
             background: white;
@@ -243,6 +249,17 @@
             100% { transform: rotate(360deg); }
         }
 
+        .error {
+            display: none;
+            color: #721c24;
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            text-align: center;
+        }
+
         @media (max-width: 768px) {
             .feature-box {
                 flex: 0 0 100%;
@@ -292,8 +309,10 @@
             
             <input type="file" id="file-input" accept="image/*">
             
-            <button class="btn" id="generate-btn">MCQ জেনারেট করুন</button>
+            <button class="btn" id="generate-btn" disabled>MCQ জেনারেট করুন</button>
         </div>
+
+        <div class="error" id="error-message"></div>
 
         <div class="loading" id="loading">
             <div class="loading-spinner"></div>
@@ -323,6 +342,9 @@
     </footer>
 
     <script>
+        // Gemini API Key
+        const API_KEY = "AIzaSyBlKqfALOBjL507zBjaTajoDzMs9u7yK40";
+        
         document.addEventListener('DOMContentLoaded', function() {
             const fileInput = document.getElementById('file-input');
             const uploadArea = document.getElementById('upload-area');
@@ -334,6 +356,7 @@
             const quizContainer = document.getElementById('quiz-container');
             const copyQuestionsBtn = document.getElementById('copy-questions');
             const downloadQuestionsBtn = document.getElementById('download-questions');
+            const errorMessage = document.getElementById('error-message');
             
             let extractedTextContent = "";
             let mcqQuestions = [];
@@ -369,76 +392,99 @@
             function updateFileName() {
                 if (fileInput.files.length) {
                     fileName.textContent = fileInput.files[0].name;
+                    generateBtn.disabled = false;
                 } else {
                     fileName.textContent = "কোন ফাইল নির্বাচন করা হয়নি";
+                    generateBtn.disabled = true;
                 }
+                hideError();
             }
             
             // Generate button click handler
             generateBtn.addEventListener('click', function() {
                 if (!fileInput.files.length) {
-                    alert('অনুগ্রহ করে একটি ছবি আপলোড করুন');
+                    showError('অনুগ্রহ করে একটি ছবি আপলোড করুন');
                     return;
                 }
                 
                 loading.style.display = 'block';
                 resultSection.style.display = 'none';
+                hideError();
                 
-                // Simulate API calls for demonstration
-                // In a real implementation, you would call the Gemini API here
-                AIzaSyBlKqfALOBjL507zBjaTajoDzMs9u7yK40();
+                // Process the image with Gemini API
+                processImageWithGemini(fileInput.files[0]);
             });
             
-            function simulateTextExtraction() {
-                // This is a simulation - in reality, you would call the Gemini API
-               AIzaSyC1TLMOvMPXqfqSVHqjmFXVJSF72V9MMH8(() => {
-                    extractedTextContent = "বাংলাদেশ দক্ষিণ এশিয়ার একটি জনবহুল দেশ। এটি ১৯৭১ সালে পাকিস্তান থেকে স্বাধীনতা লাভ করে। বাংলাদেশের রাজধানীর নাম ঢাকা। বাংলাদেশের অর্থনীতি কৃষি, তৈরি পোশাক শিল্প এবং remittance এর উপর অনেকটা নির্ভরশীল। বাংলাদেশের জাতীয় ফুল হল শাপলা, জাতীয় পাখি দোয়েল, এবং জাতীয়动物 বাঘ।";
+            // Gemini API Integration
+            async function processImageWithGemini(imageFile) {
+                try {
+                    // Convert image to base64
+                    const base64Image = await fileToBase64(imageFile);
                     
+                    // Initialize the Generative AI model
+                    const genAI = new GoogleGenerativeAI(API_KEY);
+                    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+                    
+                    // Extract text from image
+                    const extractionPrompt = "এই ছবি থেকে বাংলা টেক্সট এক্সট্র্যাক্ট করুন। শুধুমাত্র টেক্সট রিটার্ন করুন, অন্য কোনো কথা যোগ করবেন না।";
+                    const extractionResult = await model.generateContent([
+                        { text: extractionPrompt },
+                        { inlineData: { mimeType: imageFile.type, data: base64Image.split(',')[1] } }
+                    ]);
+                    
+                    const extractionResponse = await extractionResult.response;
+                    extractedTextContent = extractionResponse.text();
+                    
+                    // Display extracted text
                     extractedText.textContent = extractedTextContent;
-                    simulateMCQGeneration();
-                }, 2000);
+                    
+                    // Generate MCQs from extracted text
+                    const mcqPrompt = `নিচের টেক্সট থেকে বাংলায় ৫টি বহু নির্বাচনী প্রশ্ন (MCQ) তৈরি কর। প্রতিটি প্রশ্নের ৪টি option দিন এবং সঠিক উত্তরটি নির্দেশ কর। JSON ফরম্যাটে উত্তর দাও। JSON এর structure হবে: [{"question": "প্রশ্ন", "options": ["option1", "option2", "option3", "option4"], "correct": 0}] যেখানে correct হল সঠিক option এর index (0 থেকে 3)। টেক্সট: ${extractedTextContent}`;
+                    
+                    const mcqResult = await model.generateContent(mcqPrompt);
+                    const mcqResponse = await mcqResult.response;
+                    const mcqText = mcqResponse.text();
+                    
+                    // Try to extract JSON from the response
+                    try {
+                        // Remove markdown code block notation if present
+                        const jsonString = mcqText.replace(/```json|```/g, '').trim();
+                        mcqQuestions = JSON.parse(jsonString);
+                        
+                        // Display MCQs
+                        displayMCQQuestions();
+                        
+                        loading.style.display = 'none';
+                        resultSection.style.display = 'block';
+                    } catch (e) {
+                        console.error("Error parsing MCQ JSON:", e);
+                        showError("MCQ জেনারেট করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।");
+                        loading.style.display = 'none';
+                    }
+                    
+                } catch (error) {
+                    console.error("Error processing image with Gemini:", error);
+                    showError("ইমেজ প্রসেস করতে সমস্যা হয়েছে: " + error.message);
+                    loading.style.display = 'none';
+                }
             }
             
-            function simulateMCQGeneration() {
-                // This is a simulation - in reality, you would call the Gemini API
-                AIzaSyC1TLMOvMPXqfqSVHqjmFXVJSF72V9MMH8(() => {
-                    mcqQuestions = [
-                        {
-                            question: "বাংলাদেশ কোন বছরে স্বাধীনতা লাভ করে?",
-                            options: ["১৯৬৫", "১৯৭১", "১৯৫২", "১৯৮১"],
-                            correct: 1
-                        },
-                        {
-                            question: "বাংলাদেশের রাজধানীর নাম কি?",
-                            options: ["চittাগong", "রাজশাহী", "খুলনা", "ঢাকা"],
-                            correct: 3
-                        },
-                        {
-                            question: "বাংলাদেশের জাতীয় ফুল কি?",
-                            options: ["গোলাপ", "শাপলা", "কমল", "বেলি"],
-                            correct: 1
-                        },
-                        {
-                            question: "বাংলাদেশের জাতীয় পাখির নাম কি?",
-                            options: ["চিল", "কাক", "দোয়েল", "ময়ূর"],
-                            correct: 2
-                        },
-                        {
-                            question: "বাংলাদেশের অর্থনীতি প্রধানত কি উপর নির্ভরশীল?",
-                            options: ["তৈল", "প্রযুক্তি", "কৃষি ও তৈরি পোশাক", "খনিজ"],
-                            correct: 2
-                        }
-                    ];
-                    
-                    displayMCQQuestions();
-                    
-                    loading.style.display = 'none';
-                    resultSection.style.display = 'block';
-                }, 2000);
+            function fileToBase64(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.readAsDataURL(file);
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = error => reject(error);
+                });
             }
             
             function displayMCQQuestions() {
                 quizContainer.innerHTML = '';
+                
+                if (!mcqQuestions || mcqQuestions.length === 0) {
+                    quizContainer.innerHTML = '<p>কোন MCQ প্রশ্ন জেনারেট করা যায়নি। অনুগ্রহ করে অন্য একটি ছবি尝试 করুন।</p>';
+                    return;
+                }
                 
                 mcqQuestions.forEach((q, index) => {
                     const questionEl = document.createElement('div');
@@ -482,6 +528,11 @@
             
             // Copy questions button
             copyQuestionsBtn.addEventListener('click', function() {
+                if (!mcqQuestions || mcqQuestions.length === 0) {
+                    showError("কপি করার জন্য কোনো প্রশ্ন নেই");
+                    return;
+                }
+                
                 const questionsText = mcqQuestions.map((q, index) => {
                     return `${index + 1}. ${q.question}\n${q.options.map((opt, i) => `   ${String.fromCharCode(65 + i)}. ${opt}`).join('\n')}\nসঠিক উত্তর: ${String.fromCharCode(65 + q.correct)}\n`;
                 }).join('\n');
@@ -492,11 +543,17 @@
                     })
                     .catch(err => {
                         console.error('কপি করতে সমস্যা হয়েছে: ', err);
+                        showError("কপি করতে সমস্যা হয়েছে: " + err.message);
                     });
             });
             
             // Download questions button
             downloadQuestionsBtn.addEventListener('click', function() {
+                if (!mcqQuestions || mcqQuestions.length === 0) {
+                    showError("ডাউনলোড করার জন্য কোনো প্রশ্ন নেই");
+                    return;
+                }
+                
                 const questionsText = mcqQuestions.map((q, index) => {
                     return `${index + 1}. ${q.question}\n${q.options.map((opt, i) => `   ${String.fromCharCode(65 + i)}. ${opt}`).join('\n')}\nসঠিক উত্তর: ${String.fromCharCode(65 + q.correct)}\n`;
                 }).join('\n');
@@ -516,6 +573,15 @@
                     URL.revokeObjectURL(url);
                 }, 100);
             });
+            
+            function showError(message) {
+                errorMessage.textContent = message;
+                errorMessage.style.display = 'block';
+            }
+            
+            function hideError() {
+                errorMessage.style.display = 'none';
+            }
         });
     </script>
 </body>
