@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Exam Simplifier - আপনার পড়াশোনাকে সহজ করে তুলুন</title>
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@google/generative-ai/dist/index.min.js"></script>
     <style>
         * {
@@ -342,7 +343,7 @@
     </footer>
 
     <script>
-        // Gemini API Key
+        // API Key and Gemini initialization
         const API_KEY = "AIzaSyBlKqfALOBjL507zBjaTajoDzMs9u7yK40";
         
         document.addEventListener('DOMContentLoaded', function() {
@@ -415,7 +416,6 @@
                 processImageWithGemini(fileInput.files[0]);
             });
             
-            // Gemini API Integration
             async function processImageWithGemini(imageFile) {
                 try {
                     // Convert image to base64
