@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Exam Simplifier - আপনার পড়াশোনাকে সহজ করে তুলুন</title>
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/@google/generative-ai@0.21.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@google/generative-ai/dist/index.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -342,8 +343,8 @@
     </footer>
 
     <script>
-        // Gemini API Key
-        const API_KEY = "AIzaSyBWdaXUKCvvQC0RHw1rOPKtuaSuzQ5EMBI";
+        // API Key and Gemini initialization
+        const API_KEY = "AIzaSyC1TLMOvMPXqfqSVHqjmFXVJSF72V9MMH8";
         
         document.addEventListener('DOMContentLoaded', function() {
             const fileInput = document.getElementById('file-input');
@@ -415,21 +416,13 @@
                 processImageWithGemini(fileInput.files[0]);
             });
             
-            // Gemini API Integration
             async function processImageWithGemini(imageFile) {
                 try {
-                    // Check if GoogleGenerativeAI is available
-                    if (typeof google === 'undefined' || !google.generativeai) {
-                        showError("Gemini API লোড হয়নি। ইন্টারনেট কানেকশন চেক করুন এবং পেজটি রিলোড করুন।");
-                        loading.style.display = 'none';
-                        return;
-                    }
-                    
                     // Convert image to base64
                     const base64Image = await fileToBase64(imageFile);
                     
                     // Initialize the Generative AI model
-                    const genAI = new google.generativeai.GenerativeAI(API_KEY);
+                    const genAI = new GoogleGenerativeAI(API_KEY);
                     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
                     
                     // Extract text from image
@@ -552,7 +545,7 @@
                         console.error('কপি করতে সমস্যা হয়েছে: ', err);
                         showError("কপি করতে সমস্যা হয়েছে: " + err.message);
                     });
-            }
+            });
             
             // Download questions button
             downloadQuestionsBtn.addEventListener('click', function() {
