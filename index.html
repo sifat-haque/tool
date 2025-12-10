@@ -1,588 +1,147 @@
-<!DOCTYPE html>
-<html lang="bn">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Exam Simplifier - আপনার পড়াশোনাকে সহজ করে তুলুন</title>
-    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@google/generative-ai/dist/index.min.js"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Hind Siliguri', sans-serif;
-        }
+import React, { useState, useCallback } from 'react';
+import { FileUpload } from './components/FileUpload';
+import { ResultsView } from './components/ResultsView';
+import { analyzeImageAndGenerateQA } from './services/gemini';
+import { AppState, AnalysisResult, ProcessingError } from './types';
+import { Sparkles, BookOpenCheck, Loader2, AlertCircle } from 'lucide-react';
 
-        body {
-            background-color: #f5f7fa;
-            color: #333;
-            line-height: 1.6;
-        }
+const App: React.FC = () => {
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [appState, setAppState] = useState<AppState>(AppState.IDLE);
+  const [result, setResult] = useState<AnalysisResult | null>(null);
+  const [error, setError] = useState<ProcessingError | null>(null);
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
+  const handleImageSelected = useCallback((base64: string) => {
+    setSelectedImage(base64);
+    setAppState(AppState.IDLE);
+    setResult(null);
+    setError(null);
+  }, []);
 
-        header {
-            text-align: center;
-            padding: 20px 0;
-            background: linear-gradient(135deg, #4b6cb7 0%, #182848 100%);
-            color: white;
-            border-radius: 10px;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
+  const handleClear = useCallback(() => {
+    setSelectedImage(null);
+    setAppState(AppState.IDLE);
+    setResult(null);
+    setError(null);
+  }, []);
 
-        header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-        }
+  const handleGenerate = async () => {
+    if (!selectedImage) return;
 
-        header p {
-            font-size: 1.2rem;
-            opacity: 0.9;
-        }
+    setAppState(AppState.PROCESSING);
+    setError(null);
 
-        .features {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            margin-bottom: 30px;
-        }
+    try {
+      // Extract base64 data strictly (remove data:image/jpeg;base64, prefix if present)
+      // The API often handles full Data URIs in some SDK versions, but let's be safe and clean it for inlineData
+      const base64Data = selectedImage.split(',')[1]; 
+      
+      const data = await analyzeImageAndGenerateQA(base64Data);
+      setResult(data);
+      setAppState(AppState.SUCCESS);
+    } catch (err: any) {
+      setAppState(AppState.ERROR);
+      setError({
+        message: err.message || "Something went wrong while processing the image."
+      });
+    }
+  };
 
-        .feature-box {
-            flex: 0 0 32%;
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .feature-box i {
-            font-size: 2.5rem;
-            color: #4b6cb7;
-            margin-bottom: 15px;
-        }
-
-        .feature-box h3 {
-            font-size: 1.3rem;
-            margin-bottom: 10px;
-            color: #182848;
-        }
-
-        .upload-section {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            margin-bottom: 30px;
-            text-align: center;
-        }
-
-        .upload-area {
-            border: 2px dashed #4b6cb7;
-            border-radius: 8px;
-            padding: 40px 20px;
-            margin: 20px 0;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .upload-area:hover {
-            background-color: #f0f4ff;
-        }
-
-        .upload-area i {
-            font-size: 3rem;
-            color: #4b6cb7;
-            margin-bottom: 15px;
-        }
-
-        .upload-area p {
-            margin-bottom: 15px;
-        }
-
-        #file-input {
-            display: none;
-        }
-
-        .btn {
-            background: linear-gradient(135deg, #4b6cb7 0%, #182848 100%);
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 50px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: inline-block;
-            margin: 10px 5px;
-        }
-
-        .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .btn:active {
-            transform: translateY(0);
-        }
-
-        .btn-secondary {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            color: #182848;
-        }
-
-        .btn:disabled {
-            background: #cccccc;
-            cursor: not-allowed;
-        }
-
-        .result-section {
-            display: none;
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            margin-bottom: 30px;
-        }
-
-        .result-section h2 {
-            text-align: center;
-            margin-bottom: 20px;
-            color: #182848;
-        }
-
-        .extracted-text {
-            background: #f5f7fa;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-
-        .quiz-container {
-            margin-top: 20px;
-        }
-
-        .question {
-            background: #f5f7fa;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-
-        .options {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-top: 15px;
-        }
-
-        @media (max-width: 768px) {
-            .options {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .option {
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid #ddd;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .option:hover {
-            background: #e6eeff;
-        }
-
-        .option.correct {
-            background: #d4edda;
-            border-color: #c3e6cb;
-        }
-
-        .option.incorrect {
-            background: #f8d7da;
-            border-color: #f5c6cb;
-        }
-
-        .download-options {
-            display: flex;
-            justify-content: center;
-            margin-top: 20px;
-        }
-
-        footer {
-            text-align: center;
-            padding: 20px;
-            color: #6c757d;
-            font-size: 0.9rem;
-        }
-
-        .loading {
-            display: none;
-            text-align: center;
-            margin: 20px 0;
-        }
-
-        .loading-spinner {
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid #4b6cb7;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .error {
-            display: none;
-            color: #721c24;
-            background-color: #f8d7da;
-            border-color: #f5c6cb;
-            padding: 10px;
-            border-radius: 5px;
-            margin: 10px 0;
-            text-align: center;
-        }
-
-        @media (max-width: 768px) {
-            .feature-box {
-                flex: 0 0 100%;
-            }
-            
-            header h1 {
-                font-size: 2rem;
-            }
-        }
-    </style>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body>
-    <div class="container">
-        <header>
-            <h1>Exam Simplifier</h1>
-            <p>আপনার পড়াশোনাকে সহজ করে তুলুন AI এর সাহায্যে</p>
-        </header>
-
-        <div class="features">
-            <div class="feature-box">
-                <i class="fas fa-upload"></i>
-                <h3>ছবি আপলোড করুন</h3>
-                <p>বাংলা বইয়ের পাতা বা হাতে লেখা নোট আপলোড করুন</p>
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-slate-50">
+      {/* Header */}
+      <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md border-b border-slate-200">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-indigo-600 rounded-lg text-white">
+              <BookOpenCheck size={24} />
             </div>
-            <div class="feature-box">
-                <i class="fas fa-text-height"></i>
-                <h3>টেক্সট এক্সট্র্যাক্ট করুন</h3>
-                <p>AI এর সাহায্যে ছবি থেকে বাংলা টেক্সট বের করুন</p>
+            <div>
+              <h1 className="text-xl font-bold text-slate-900 tracking-tight">Bengali EduGen</h1>
             </div>
-            <div class="feature-box">
-                <i class="fas fa-question-circle"></i>
-                <h3>MCQ জেনারেট করুন</h3>
-                <p>স্বয়ংক্রিয়ভাবে তৈরি করুন বহু নির্বাচনী প্রশ্ন</p>
-            </div>
+          </div>
+          <div className="flex items-center gap-2 text-sm font-medium text-slate-500">
+            <Sparkles size={16} className="text-amber-500" />
+            <span>Powered by Gemini</span>
+          </div>
         </div>
+      </header>
 
-        <div class="upload-section">
-            <h2>আপনার ছবি আপলোড করুন</h2>
-            <p>আমরা PNG, JPG, JPEG এবং PDF (ইমেজ হিসেবে) ফাইল সাপোর্ট করি</p>
-            
-            <div class="upload-area" id="upload-area">
-                <i class="fas fa-cloud-upload-alt"></i>
-                <p>এখানে ক্লিক করে ছবি আপলোড করুন বা ফাইলটি ড্র্যাগ এন্ড ড্রপ করুন</p>
-                <p class="file-name" id="file-name">কোন ফাইল নির্বাচন করা হয়নি</p>
-            </div>
-            
-            <input type="file" id="file-input" accept="image/*">
-            
-            <button class="btn" id="generate-btn" disabled>MCQ জেনারেট করুন</button>
-        </div>
-
-        <div class="error" id="error-message"></div>
-
-        <div class="loading" id="loading">
-            <div class="loading-spinner"></div>
-            <p>আপনার রিকোয়েস্ট প্রসেস করা হচ্ছে, অনুগ্রহ করে অপেক্ষা করুন...</p>
-        </div>
-
-        <div class="result-section" id="result-section">
-            <h2>এক্সট্র্যাক্ট করা টেক্সট</h2>
-            <div class="extracted-text" id="extracted-text">
-                এক্সট্র্যাক্ট করা টেক্সট এখানে দেখানো হবে...
-            </div>
-            
-            <h2>জেনারেট করা MCQ প্রশ্ন</h2>
-            <div class="quiz-container" id="quiz-container">
-                <!-- MCQ questions will be inserted here -->
-            </div>
-            
-            <div class="download-options">
-                <button class="btn btn-secondary" id="copy-questions">প্রশ্নগুলি কপি করুন</button>
-                <button class="btn btn-secondary" id="download-questions">প্রশ্নগুলি ডাউনলোড করুন</button>
-            </div>
-        </div>
-    </div>
-
-    <footer>
-        <p>© 2023 Exam Simplifier - AI পাওয়ার্ড এডুকেশনাল টুল</p>
-    </footer>
-
-    <script>
-        // API Key and Gemini initialization
-        const API_KEY = "AIzaSyC1TLMOvMPXqfqSVHqjmFXVJSF72V9MMH8";
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         
-        document.addEventListener('DOMContentLoaded', function() {
-            const fileInput = document.getElementById('file-input');
-            const uploadArea = document.getElementById('upload-area');
-            const fileName = document.getElementById('file-name');
-            const generateBtn = document.getElementById('generate-btn');
-            const loading = document.getElementById('loading');
-            const resultSection = document.getElementById('result-section');
-            const extractedText = document.getElementById('extracted-text');
-            const quizContainer = document.getElementById('quiz-container');
-            const copyQuestionsBtn = document.getElementById('copy-questions');
-            const downloadQuestionsBtn = document.getElementById('download-questions');
-            const errorMessage = document.getElementById('error-message');
-            
-            let extractedTextContent = "";
-            let mcqQuestions = [];
-            
-            // Upload area click handler
-            uploadArea.addEventListener('click', function() {
-                fileInput.click();
-            });
-            
-            // Drag and drop functionality
-            uploadArea.addEventListener('dragover', function(e) {
-                e.preventDefault();
-                uploadArea.style.backgroundColor = '#f0f4ff';
-            });
-            
-            uploadArea.addEventListener('dragleave', function() {
-                uploadArea.style.backgroundColor = '';
-            });
-            
-            uploadArea.addEventListener('drop', function(e) {
-                e.preventDefault();
-                uploadArea.style.backgroundColor = '';
-                
-                if (e.dataTransfer.files.length) {
-                    fileInput.files = e.dataTransfer.files;
-                    updateFileName();
-                }
-            });
-            
-            // File input change handler
-            fileInput.addEventListener('change', updateFileName);
-            
-            function updateFileName() {
-                if (fileInput.files.length) {
-                    fileName.textContent = fileInput.files[0].name;
-                    generateBtn.disabled = false;
-                } else {
-                    fileName.textContent = "কোন ফাইল নির্বাচন করা হয়নি";
-                    generateBtn.disabled = true;
-                }
-                hideError();
-            }
-            
-            // Generate button click handler
-            generateBtn.addEventListener('click', function() {
-                if (!fileInput.files.length) {
-                    showError('অনুগ্রহ করে একটি ছবি আপলোড করুন');
-                    return;
-                }
-                
-                loading.style.display = 'block';
-                resultSection.style.display = 'none';
-                hideError();
-                
-                // Process the image with Gemini API
-                processImageWithGemini(fileInput.files[0]);
-            });
-            
-            async function processImageWithGemini(imageFile) {
-                try {
-                    // Convert image to base64
-                    const base64Image = await fileToBase64(imageFile);
-                    
-                    // Initialize the Generative AI model
-                    const genAI = new GoogleGenerativeAI(API_KEY);
-                    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-                    
-                    // Extract text from image
-                    const extractionPrompt = "এই ছবি থেকে বাংলা টেক্সট এক্সট্র্যাক্ট করুন। শুধুমাত্র টেক্সট রিটার্ন করুন, অন্য কোনো কথা যোগ করবেন না।";
-                    const extractionResult = await model.generateContent([
-                        { text: extractionPrompt },
-                        { inlineData: { mimeType: imageFile.type, data: base64Image.split(',')[1] } }
-                    ]);
-                    
-                    const extractionResponse = await extractionResult.response;
-                    extractedTextContent = extractionResponse.text();
-                    
-                    // Display extracted text
-                    extractedText.textContent = extractedTextContent;
-                    
-                    // Generate MCQs from extracted text
-                    const mcqPrompt = `নিচের টেক্সট থেকে বাংলায় ৫টি বহু নির্বাচনী প্রশ্ন (MCQ) তৈরি কর। প্রতিটি প্রশ্নের ৪টি option দিন এবং সঠিক উত্তরটি নির্দেশ কর। JSON ফরম্যাটে উত্তর দাও। JSON এর structure হবে: [{"question": "প্রশ্ন", "options": ["option1", "option2", "option3", "option4"], "correct": 0}] যেখানে correct হল সঠিক option এর index (0 থেকে 3)। টেক্সট: ${extractedTextContent}`;
-                    
-                    const mcqResult = await model.generateContent(mcqPrompt);
-                    const mcqResponse = await mcqResult.response;
-                    const mcqText = mcqResponse.text();
-                    
-                    // Try to extract JSON from the response
-                    try {
-                        // Remove markdown code block notation if present
-                        const jsonString = mcqText.replace(/```json|```/g, '').trim();
-                        mcqQuestions = JSON.parse(jsonString);
-                        
-                        // Display MCQs
-                        displayMCQQuestions();
-                        
-                        loading.style.display = 'none';
-                        resultSection.style.display = 'block';
-                    } catch (e) {
-                        console.error("Error parsing MCQ JSON:", e);
-                        showError("MCQ জেনারেট করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।");
-                        loading.style.display = 'none';
-                    }
-                    
-                } catch (error) {
-                    console.error("Error processing image with Gemini:", error);
-                    showError("ইমেজ প্রসেস করতে সমস্যা হয়েছে: " + error.message);
-                    loading.style.display = 'none';
-                }
-            }
-            
-            function fileToBase64(file) {
-                return new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.readAsDataURL(file);
-                    reader.onload = () => resolve(reader.result);
-                    reader.onerror = error => reject(error);
-                });
-            }
-            
-            function displayMCQQuestions() {
-                quizContainer.innerHTML = '';
-                
-                if (!mcqQuestions || mcqQuestions.length === 0) {
-                    quizContainer.innerHTML = '<p>কোন MCQ প্রশ্ন জেনারেট করা যায়নি। অনুগ্রহ করে অন্য একটি ছবি尝试 করুন।</p>';
-                    return;
-                }
-                
-                mcqQuestions.forEach((q, index) => {
-                    const questionEl = document.createElement('div');
-                    questionEl.className = 'question';
-                    
-                    questionEl.innerHTML = `
-                        <h3>${index + 1}. ${q.question}</h3>
-                        <div class="options">
-                            ${q.options.map((option, optIndex) => 
-                                `<div class="option" data-index="${optIndex}" data-question="${index}">${option}</div>`
-                            ).join('')}
-                        </div>
-                    `;
-                    
-                    quizContainer.appendChild(questionEl);
-                });
-                
-                // Add event listeners to options
-                document.querySelectorAll('.option').forEach(option => {
-                    option.addEventListener('click', function() {
-                        const questionIndex = parseInt(this.getAttribute('data-question'));
-                        const selectedIndex = parseInt(this.getAttribute('data-index'));
-                        const correctIndex = mcqQuestions[questionIndex].correct;
-                        
-                        // Remove any existing classes
-                        this.parentElement.querySelectorAll('.option').forEach(opt => {
-                            opt.classList.remove('correct', 'incorrect');
-                        });
-                        
-                        // Check if correct
-                        if (selectedIndex === correctIndex) {
-                            this.classList.add('correct');
-                        } else {
-                            this.classList.add('incorrect');
-                            // Also highlight the correct answer
-                            this.parentElement.querySelector(`.option[data-index="${correctIndex}"]`).classList.add('correct');
-                        }
-                    });
-                });
-            }
-            
-            // Copy questions button
-            copyQuestionsBtn.addEventListener('click', function() {
-                if (!mcqQuestions || mcqQuestions.length === 0) {
-                    showError("কপি করার জন্য কোনো প্রশ্ন নেই");
-                    return;
-                }
-                
-                const questionsText = mcqQuestions.map((q, index) => {
-                    return `${index + 1}. ${q.question}\n${q.options.map((opt, i) => `   ${String.fromCharCode(65 + i)}. ${opt}`).join('\n')}\nসঠিক উত্তর: ${String.fromCharCode(65 + q.correct)}\n`;
-                }).join('\n');
-                
-                navigator.clipboard.writeText(questionsText)
-                    .then(() => {
-                        alert('প্রশ্নগুলি কপি করা হয়েছে!');
-                    })
-                    .catch(err => {
-                        console.error('কপি করতে সমস্যা হয়েছে: ', err);
-                        showError("কপি করতে সমস্যা হয়েছে: " + err.message);
-                    });
-            });
-            
-            // Download questions button
-            downloadQuestionsBtn.addEventListener('click', function() {
-                if (!mcqQuestions || mcqQuestions.length === 0) {
-                    showError("ডাউনলোড করার জন্য কোনো প্রশ্ন নেই");
-                    return;
-                }
-                
-                const questionsText = mcqQuestions.map((q, index) => {
-                    return `${index + 1}. ${q.question}\n${q.options.map((opt, i) => `   ${String.fromCharCode(65 + i)}. ${opt}`).join('\n')}\nসঠিক উত্তর: ${String.fromCharCode(65 + q.correct)}\n`;
-                }).join('\n');
-                
-                const blob = new Blob([questionsText], { type: 'text/plain' });
-                const url = URL.createObjectURL(blob);
-                
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'exam_simplifier_questions.txt';
-                document.body.appendChild(a);
-                a.click();
-                
-                // Clean up
-                setTimeout(() => {
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
-                }, 100);
-            });
-            
-            function showError(message) {
-                errorMessage.textContent = message;
-                errorMessage.style.display = 'block';
-            }
-            
-            function hideError() {
-                errorMessage.style.display = 'none';
-            }
-        });
-    </script>
-</body>
-</html>
+        {/* Intro Section */}
+        <div className="text-center mb-10">
+          <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
+            Transform Textbooks into <span className="text-indigo-600">Smart Quizzes</span>
+          </h2>
+          <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+            Upload a page from any Bengali book. Our AI will extract the text and instantly generate 15 practice questions and answers for you.
+          </p>
+        </div>
+
+        {/* Upload Section */}
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 mb-8">
+          <FileUpload 
+            onImageSelected={handleImageSelected} 
+            selectedImage={selectedImage} 
+            onClear={handleClear}
+            disabled={appState === AppState.PROCESSING}
+          />
+
+          {selectedImage && appState !== AppState.SUCCESS && (
+            <div className="flex justify-center mt-4">
+              <button
+                onClick={handleGenerate}
+                disabled={appState === AppState.PROCESSING}
+                className={`
+                  relative flex items-center gap-3 px-8 py-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1
+                  ${appState === AppState.PROCESSING 
+                    ? 'bg-slate-100 text-slate-400 cursor-not-allowed shadow-none translate-y-0' 
+                    : 'bg-indigo-600 text-white hover:bg-indigo-700'
+                  }
+                `}
+              >
+                {appState === AppState.PROCESSING ? (
+                  <>
+                    <Loader2 className="animate-spin" size={24} />
+                    Analyzing Content...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles size={20} />
+                    Generate Questions
+                  </>
+                )}
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Error State */}
+        {appState === AppState.ERROR && error && (
+          <div className="mb-8 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3 text-red-700 animate-in fade-in slide-in-from-bottom-4">
+            <AlertCircle className="shrink-0 mt-0.5" size={20} />
+            <div>
+              <h3 className="font-semibold">Processing Failed</h3>
+              <p className="text-sm mt-1">{error.message}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Results Section */}
+        {appState === AppState.SUCCESS && result && (
+          <div className="animate-in fade-in slide-in-from-bottom-8 duration-500">
+             <ResultsView result={result} />
+          </div>
+        )}
+
+      </main>
+
+      <footer className="py-8 text-center text-slate-400 text-sm">
+        <p>&copy; {new Date().getFullYear()} Bengali EduGen AI. Built with React & Gemini.</p>
+      </footer>
+    </div>
+  );
+};
+
+export default App;
